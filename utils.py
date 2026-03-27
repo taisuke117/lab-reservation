@@ -160,10 +160,10 @@ def show_calendar_page(title, equipment_colors, page_key):
             col1, col2 = st.columns(2)
             with col1:
                 start_date = st.date_input("開始日", init_start.date())
-                start_time = st.time_input("開始時間", init_start.time())
+                start_time = st.time_input("開始時間", init_start.time(), step=3600)
             with col2:
                 end_date = st.date_input("終了日", init_end.date())
-                end_time = st.time_input("終了時間", init_end.time())
+                end_time = st.time_input("終了時間", init_end.time(), step=3600)
             col3, col4 = st.columns(2)
             with col3:
                 if st.button("✅ 予約する", type="primary"):
