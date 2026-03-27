@@ -42,4 +42,5 @@ with col2:
     st.caption("安全キャビネット／クリーンベンチ")
 
 st.markdown("---")
-st.caption("📌 各カテゴリページでカレンダーの空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・削除\n作成者・管理者　Taisuke Hani https://github.com/taisuke117")
+st.caption("📌 各カテゴリページでカレンダーの空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・削除)
+st.caption("📌 作成者・管理者　Taisuke Hani https://github.com/taisuke117")
