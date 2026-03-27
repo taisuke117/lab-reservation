@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import yagmail
 import json
 from datetime import datetime, timedelta
 from streamlit_calendar import calendar
@@ -8,8 +7,6 @@ from supabase import create_client
 
 # --- 設定読み込み ---
 USERS = json.loads(st.secrets["USERS"])
-SENDER_EMAIL = st.secrets["SENDER_EMAIL"]
-APP_PASSWORD = st.secrets["APP_PASSWORD"]
 supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
 
 def load_data():
@@ -35,52 +32,6 @@ def check_conflict(equipment, start_dt, end_dt):
         if r["start_datetime"] < str(end_dt) and r["end_datetime"] > str(start_dt):
             return True
     return False
-
-def send_confirmation_email(to_email, nickname, equipment, start_dt, end_dt):
-    subject = f"【予約完了】{equipment} のご予約"
-    body = f"""
-{nickname} 先生
-
-以下の内容でラボ機器の予約が完了しました。
-
-機器: {equipment}
-開始: {start_dt.strftime('%Y-%m-%d %H:%M')}
-終了: {end_dt.strftime('%Y-%m-%d %H:%M')}
-
----
-本メールは予約システムからの自動送信です。
-"""
-    try:
-        yag = yagmail.SMTP(user=SENDER_EMAIL, password=APP_PASSWORD)
-        yag.send(to=to_email, subject=subject, contents=[body])
-        return True
-    except Exception as e:
-        st.error(f"メール送信エラー: {type(e).__name__}: {e}")
-        return False
-
-def send_cancellation_email(to_email, nickname, equipment, start_dt, end_dt):
-    subject = f"【予約キャンセル】{equipment} のご予約が削除されました"
-    body = f"""
-{nickname} 先生
-
-以下の予約が削除されました。
-
-機器: {equipment}
-開始: {start_dt}
-終了: {end_dt}
-
-ご不明な点があれば管理者にお問い合わせください。
-
----
-本メールは予約システムからの自動送信です。
-"""
-    try:
-        yag = yagmail.SMTP(user=SENDER_EMAIL, password=APP_PASSWORD)
-        yag.send(to=to_email, subject=subject, contents=[body])
-        return True
-    except Exception as e:
-        st.error(f"キャンセルメール送信エラー: {type(e).__name__}: {e}")
-        return False
 
 def show_calendar_page(title, equipment_colors, page_key):
     equipment_list = list(equipment_colors.keys())
@@ -176,11 +127,7 @@ def show_calendar_page(title, equipment_colors, page_key):
                             st.error("⚠️ その時間は既に別の予約が入っています。")
                         else:
                             insert_reservation(nickname, equipment, start_dt, end_dt)
-                            user_email = USERS[nickname]
-                            if send_confirmation_email(user_email, nickname, equipment, start_dt, end_dt):
-                                st.success(f"予約完了！{user_email} 宛にメールを送信しました。")
-                            else:
-                                st.warning("予約は完了しましたが、メール送信でエラーが発生しました。")
+                            st.success("予約完了！")
                             st.rerun()
             with col4:
                 if st.button("✖ キャンセル"):
@@ -205,12 +152,6 @@ def show_calendar_page(title, equipment_colors, page_key):
                 with col1:
                     if st.button("🗑️ 削除する", disabled=not confirm, type="primary"):
                         delete_reservation(int(row["id"]))
-                        owner_email = USERS.get(row["nickname"])
-                        if owner_email:
-                            if send_cancellation_email(owner_email, row["nickname"], row["equipment"], row["start_datetime"], row["end_datetime"]):
-                                st.success(f"{owner_email} に通知しました。")
-                            else:
-                                st.warning("削除しましたが、通知メールの送信に失敗しました。")
                         st.rerun()
                 with col2:
                     if st.button("✖ キャンセル"):
