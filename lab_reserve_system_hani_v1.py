@@ -118,7 +118,18 @@ if not df.empty:
             "backgroundColor": equipment_colors.get(row['equipment'], "#808080"),
             "borderColor": equipment_colors.get(row['equipment'], "#808080")
         })
-
+st.markdown("""
+<style>
+.fc-timegrid-event {
+    font-size: 11px !important;
+    min-height: 20px !important;
+    overflow: hidden !important;
+}
+.fc-timegrid-event .fc-event-main {
+    padding: 1px 2px !important;
+}
+</style>
+""", unsafe_allow_html=True)
 calendar_options = {
     "headerToolbar": {
         "left": "today prev,next",
