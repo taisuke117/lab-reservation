@@ -106,7 +106,7 @@ def show_calendar_page(title, equipment_colors, page_key):
         @st.dialog("🆕 新規予約")
         def show_new_reservation_dialog(init_start, init_end):
             st.markdown(f"選択時間：**{init_start.strftime('%Y-%m-%d %H:%M')}** 〜 **{init_end.strftime('%Y-%m-%d %H:%M')}**")
-            nickname = st.selectbox("利用者", list(USERS.keys()))
+            nickname = st.selectbox("利用者", USERS)
             equipment = st.selectbox("機器を選択", equipment_list)
             col1, col2 = st.columns(2)
             with col1:
