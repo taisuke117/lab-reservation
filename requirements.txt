@@ -2,3 +2,5 @@ streamlit
 pandas
 yagmail
 streamlit-calendar
+sqlalchemy
+psycopg2-binary
