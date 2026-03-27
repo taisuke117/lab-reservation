@@ -93,12 +93,15 @@ st.title("ラボ機器 予約システム")
 st.caption("📌 カレンダーの空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・削除")
 
 equipment_colors = {
-    "回転式ミクロトーム（旧型）": "#FF4B4B",
-    "回転式ミクロトーム（新型）": "#0068C9",
-    "滑走型ミクロトーム": "#83C9FF",
-    "染色系列": "#FFABAB",
-    "バーチャル撮影装置": "#29B09D",
-    "分生エリア": "#FFFF00"
+    "回転式ミクロトーム（旧型）": "#002060",
+    "回転式ミクロトーム（新型）": "#0B76A0",
+    "滑走型ミクロトーム": "#4E95D9",
+    "染色系列": "#D86ECC",
+    "バーチャル撮影装置": "#747474",
+    "分生エリア": "#EAB200",
+    "分生室": "#C97A07",
+    "安全キャビネット": "#059349",
+    "クリーンベンチ": "#00B050"
 }
 equipment_list = list(equipment_colors.keys())
 
@@ -129,14 +132,15 @@ calendar_options = {
     "selectMinDistance": 0,
     "timeZone": "Asia/Tokyo",
     "slotLabelFormat": {"hour": "2-digit", "minute": "2-digit", "hour12": False},
-    "slotDuration": "01:00:00",
+    "eventTimeFormat": {"hour": "2-digit", "minute": "2-digit", "hour12": False},
+    "slotDuration": "00:30:00",       # 30分刻みで縦幅を確保
+    "slotLabelInterval": "01:00:00",  # ラベルは1時間ごとに表示
     "slotMinTime": "07:00:00",
     "slotMaxTime": "31:00:00",
     "scrollTime": "07:00:00",
     "expandRows": True,
     "contentHeight": "auto",
 }
-
 cal_result = calendar(events=events, options=calendar_options, key="main_calendar")
 
 # --- 5. クリック or ドラッグ → 新規予約ダイアログ ---
