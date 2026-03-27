@@ -1,7 +1,6 @@
 import streamlit as st
 import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append("/mount/src/lab-reservation")
 from utils import show_calendar_page
 
 st.set_page_config(page_title="ミクロトーム予約", layout="wide")
