@@ -1,7 +1,7 @@
 import streamlit as st
 
-st.set_page_config(page_title="ラボ機器 予約システム", layout="wide")
-st.title("🔬 ラボ機器 予約システム")
+st.set_page_config(page_title="NDUP機器 予約システム", layout="wide")
+st.title("🔬 NDUP機器 予約システム")
 st.markdown("---")
 st.subheader("予約したい機器のカテゴリを選んでください")
 
@@ -42,4 +42,4 @@ with col2:
     st.caption("安全キャビネット／クリーンベンチ")
 
 st.markdown("---")
-st.caption("📌 各カテゴリページでカレンダーの空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・削除")
+st.caption("📌 各カテゴリページでカレンダーの空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・削除\n作成者・管理者　Taisuke Hani https://github.com/taisuke117")
