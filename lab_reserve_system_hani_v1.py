@@ -4,35 +4,41 @@ import yagmail
 import json
 from datetime import datetime, date, time, timedelta
 from streamlit_calendar import calendar
-from sqlalchemy import create_engine, text
+from supabase import create_client
 
-# --- 1. ユーザー設定とメール送信設定 ---
+# --- 1. 設定読み込み ---
 USERS = json.loads(st.secrets["USERS"])
 SENDER_EMAIL = st.secrets["SENDER_EMAIL"]
 APP_PASSWORD = st.secrets["APP_PASSWORD"]
 
-# --- 2. Supabaseデータベース接続 ---
-engine = create_engine(st.secrets["DATABASE_URL"])
-
-def init_db():
-    with engine.connect() as conn:
-        conn.execute(text('''
-            CREATE TABLE IF NOT EXISTS reservations (
-                id SERIAL PRIMARY KEY,
-                nickname TEXT,
-                equipment TEXT,
-                start_datetime TEXT,
-                end_datetime TEXT
-            )
-        '''))
-        conn.commit()
-
-init_db()
+# --- 2. Supabaseクライアント ---
+supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
 
 def load_data():
-    with engine.connect() as conn:
-        df = pd.read_sql("SELECT * FROM reservations ORDER BY start_datetime", conn)
-    return df
+    response = supabase.table("reservations").select("*").order("start_datetime").execute()
+    if response.data:
+        return pd.DataFrame(response.data)
+    return pd.DataFrame(columns=["id", "nickname", "equipment", "start_datetime", "end_datetime"])
+
+def insert_reservation(nickname, equipment, start_dt, end_dt):
+    supabase.table("reservations").insert({
+        "nickname": nickname,
+        "equipment": equipment,
+        "start_datetime": str(start_dt),
+        "end_datetime": str(end_dt)
+    }).execute()
+
+def delete_reservation(reservation_id):
+    supabase.table("reservations").delete().eq("id", reservation_id).execute()
+
+def check_conflict(equipment, start_dt, end_dt):
+    response = supabase.table("reservations").select("*").eq("equipment", equipment).execute()
+    for r in response.data:
+        r_start = r["start_datetime"]
+        r_end = r["end_datetime"]
+        if r_start < str(end_dt) and r_end > str(start_dt):
+            return True
+    return False
 
 # --- メール送信関数 ---
 def send_confirmation_email(to_email, nickname, equipment, start_dt, end_dt):
@@ -185,25 +191,11 @@ if trigger == "new" and init_start and init_end:
                 if start_dt >= end_dt:
                     st.error("終了日時は開始日時より後に設定してください。")
                 else:
-                    with engine.connect() as conn:
-                        result = conn.execute(text('''
-                            SELECT * FROM reservations
-                            WHERE equipment=:equipment
-                            AND start_datetime < :end
-                            AND end_datetime > :start
-                        '''), {"equipment": equipment, "start": str(start_dt), "end": str(end_dt)})
-                        conflict = result.fetchone()
-
+                    conflict = check_conflict(equipment, start_dt, end_dt)
                     if conflict:
                         st.error("⚠️ その時間は既に別の予約が入っています。")
                     else:
-                        with engine.connect() as conn:
-                            conn.execute(text('''
-                                INSERT INTO reservations (nickname, equipment, start_datetime, end_datetime)
-                                VALUES (:nickname, :equipment, :start, :end)
-                            '''), {"nickname": nickname, "equipment": equipment,
-                                   "start": str(start_dt), "end": str(end_dt)})
-                            conn.commit()
+                        insert_reservation(nickname, equipment, start_dt, end_dt)
                         user_email = USERS[nickname]
                         mail_success = send_confirmation_email(user_email, nickname, equipment, start_dt, end_dt)
                         if mail_success:
@@ -222,14 +214,10 @@ if cal_result and cal_result.get("eventClick"):
     clicked = cal_result["eventClick"]["event"]
     clicked_id = int(clicked["id"])
 
-    with engine.connect() as conn:
-        result_df = pd.read_sql(
-            text("SELECT * FROM reservations WHERE id=:id"),
-            conn, params={"id": clicked_id}
-        )
+    df_click = df[df["id"] == clicked_id]
 
-    if not result_df.empty:
-        row = result_df.iloc[0]
+    if not df_click.empty:
+        row = df_click.iloc[0]
 
         @st.dialog("📋 予約の詳細")
         def show_reservation_dialog(row):
@@ -243,10 +231,7 @@ if cal_result and cal_result.get("eventClick"):
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("🗑️ 削除する", disabled=not confirm, type="primary"):
-                    with engine.connect() as conn2:
-                        conn2.execute(text("DELETE FROM reservations WHERE id=:id"), {"id": int(row["id"])})
-                        conn2.commit()
-
+                    delete_reservation(int(row["id"]))
                     owner_email = USERS.get(row["nickname"])
                     if owner_email:
                         mail_ok = send_cancellation_email(
