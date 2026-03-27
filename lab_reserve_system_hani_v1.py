@@ -118,18 +118,7 @@ if not df.empty:
             "backgroundColor": equipment_colors.get(row['equipment'], "#808080"),
             "borderColor": equipment_colors.get(row['equipment'], "#808080")
         })
-st.markdown("""
-<style>
-.fc-timegrid-event {
-    font-size: 11px !important;
-    min-height: 20px !important;
-    overflow: hidden !important;
-}
-.fc-timegrid-event .fc-event-main {
-    padding: 1px 2px !important;
-}
-</style>
-""", unsafe_allow_html=True)
+
 calendar_options = {
     "headerToolbar": {
         "left": "today prev,next",
@@ -144,13 +133,14 @@ calendar_options = {
     "timeZone": "Asia/Tokyo",
     "slotLabelFormat": {"hour": "2-digit", "minute": "2-digit", "hour12": False},
     "eventTimeFormat": {"hour": "2-digit", "minute": "2-digit", "hour12": False},
-    "slotDuration": "00:30:00",       # 30分刻みで縦幅を確保
-    "slotLabelInterval": "01:00:00",  # ラベルは1時間ごとに表示
+    "slotDuration": "01:00:00",
+    "slotLabelInterval": "01:00:00",
     "slotMinTime": "07:00:00",
     "slotMaxTime": "31:00:00",
     "scrollTime": "07:00:00",
-    "expandRows": True,
-    "contentHeight": "auto",
+    "slotMinWidth": 30,        # 横幅を狭くして並べやすくする
+    "expandRows": False,       # Trueだとスロットが引き伸ばされる
+    "contentHeight": 800,      # 固定高さにしてスクロール可能に
 }
 cal_result = calendar(events=events, options=calendar_options, key="main_calendar")
 
