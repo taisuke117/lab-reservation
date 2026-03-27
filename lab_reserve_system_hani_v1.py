@@ -138,9 +138,9 @@ calendar_options = {
     "slotMinTime": "07:00:00",
     "slotMaxTime": "31:00:00",
     "scrollTime": "07:00:00",
-    "slotMinWidth": 30,        # 横幅を狭くして並べやすくする
-    "expandRows": False,       # Trueだとスロットが引き伸ばされる
-    "contentHeight": 800,      # 固定高さにしてスクロール可能に
+    "slotMinWidth": 15,        # 横幅を狭くして並べやすくする
+    "expandRows": True,       # Trueだとスロットが引き伸ばされる
+    "contentHeight": "auto",      # 固定高さにしてスクロール可能に
 }
 cal_result = calendar(events=events, options=calendar_options, key="main_calendar")
 
