@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from streamlit_calendar import calendar
 from supabase import create_client
 
@@ -54,6 +54,7 @@ def show_calendar_page(title, equipment_colors, page_key):
                 "borderColor": equipment_colors.get(row['equipment'], "#808080")
             })
 
+    # カレンダーオプション（slotMinTime/slotMaxTimeをall-day計算に使用）
     calendar_options = {
         "headerToolbar": {
             "left": "today prev,next",
@@ -79,6 +80,10 @@ def show_calendar_page(title, equipment_colors, page_key):
 
     cal_result = calendar(events=events, options=calendar_options, key=page_key)
 
+    # slotMinTime・slotMaxTimeをパース（all-day計算用）
+    slot_min_h = int(calendar_options["slotMinTime"][:2])
+    slot_max_h = int(calendar_options["slotMaxTime"][:2])
+
     trigger = None
     init_start = None
     init_end = None
@@ -95,8 +100,22 @@ def show_calendar_page(title, equipment_colors, page_key):
 
     elif cal_result and cal_result.get("dateClick"):
         try:
-            init_start = datetime.fromisoformat(cal_result["dateClick"].get("date", "")[:16])
-            init_end = init_start + timedelta(hours=1)
+            raw = cal_result["dateClick"].get("date", "")
+            is_all_day = cal_result["dateClick"].get("allDay", False)
+            init_start = datetime.fromisoformat(raw[:16])
+            if is_all_day:
+                # 開始はslotMinTime（例：07:00）
+                init_start = init_start.replace(hour=slot_min_h, minute=0, second=0)
+                # 終了はslotMaxTime（24超えの場合は翌日に繰り越し）
+                if slot_max_h >= 24:
+                    extra_days = slot_max_h // 24
+                    end_h = slot_max_h % 24
+                    end_date = init_start.date() + timedelta(days=extra_days)
+                    init_end = datetime.combine(end_date, datetime.min.time().replace(hour=end_h))
+                else:
+                    init_end = init_start.replace(hour=slot_max_h, minute=0, second=0)
+            else:
+                init_end = init_start + timedelta(hours=1)
         except Exception:
             init_start = datetime.now().replace(minute=0, second=0, microsecond=0)
             init_end = init_start + timedelta(hours=1)
