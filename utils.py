@@ -71,9 +71,9 @@ def show_calendar_page(title, equipment_colors, page_key):
         "eventTimeFormat": {"hour": "2-digit", "minute": "2-digit", "hour12": False},
         "slotDuration": "01:00:00",
         "slotLabelInterval": "01:00:00",
-        "slotMinTime": "07:00:00",
-        "slotMaxTime": "31:00:00",
-        "scrollTime": "07:00:00",
+        "slotMinTime": "00:00:00",
+        "slotMaxTime": "23:00:00",
+        "scrollTime": "00:00:00",
         "expandRows": True,
         "contentHeight": "auto",
     }
