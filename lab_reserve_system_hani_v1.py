@@ -1,17 +1,38 @@
 import streamlit as st
 import pandas as pd
-import sqlite3
 import yagmail
+import json
 from datetime import datetime, date, time, timedelta
 from streamlit_calendar import calendar
+from sqlalchemy import create_engine, text
 
 # --- 1. ユーザー設定とメール送信設定 ---
-
-# 機密情報はst.secretsから読み込む
-import json
 USERS = json.loads(st.secrets["USERS"])
 SENDER_EMAIL = st.secrets["SENDER_EMAIL"]
 APP_PASSWORD = st.secrets["APP_PASSWORD"]
+
+# --- 2. Supabaseデータベース接続 ---
+engine = create_engine(st.secrets["DATABASE_URL"])
+
+def init_db():
+    with engine.connect() as conn:
+        conn.execute(text('''
+            CREATE TABLE IF NOT EXISTS reservations (
+                id SERIAL PRIMARY KEY,
+                nickname TEXT,
+                equipment TEXT,
+                start_datetime TEXT,
+                end_datetime TEXT
+            )
+        '''))
+        conn.commit()
+
+init_db()
+
+def load_data():
+    with engine.connect() as conn:
+        df = pd.read_sql("SELECT * FROM reservations ORDER BY start_datetime", conn)
+    return df
 
 # --- メール送信関数 ---
 def send_confirmation_email(to_email, nickname, equipment, start_dt, end_dt):
@@ -60,32 +81,6 @@ def send_cancellation_email(to_email, nickname, equipment, start_dt, end_dt):
         st.error(f"キャンセルメール送信エラー: {type(e).__name__}: {e}")
         return False
 
-# --- 2. データベースの初期設定 ---
-DB_FILE = 'lab_reservations_v2.db'
-
-def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS reservations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nickname TEXT,
-            equipment TEXT,
-            start_datetime TEXT,
-            end_datetime TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
-
-init_db()
-
-def load_data():
-    conn = sqlite3.connect(DB_FILE)
-    df = pd.read_sql_query("SELECT * FROM reservations", conn)
-    conn.close()
-    return df
-
 # --- 3. UIと画面描画 ---
 st.set_page_config(page_title="ラボ機器 予約システム", layout="wide")
 st.title("ラボ機器 予約システム")
@@ -129,8 +124,8 @@ calendar_options = {
     "timeZone": "Asia/Tokyo",
     "slotLabelFormat": {"hour": "2-digit", "minute": "2-digit", "hour12": False},
     "slotDuration": "01:00:00",
-    "slotMinTime": "07:00:00",   # 表示開始：朝7時
-    "slotMaxTime": "31:00:00",   # 表示終了：翌朝6時（24+6=30）
+    "slotMinTime": "07:00:00",
+    "slotMaxTime": "31:00:00",
     "scrollTime": "07:00:00",
     "expandRows": True,
     "contentHeight": "auto",
@@ -190,24 +185,25 @@ if trigger == "new" and init_start and init_end:
                 if start_dt >= end_dt:
                     st.error("終了日時は開始日時より後に設定してください。")
                 else:
-                    conn = sqlite3.connect(DB_FILE)
-                    c = conn.cursor()
-                    c.execute('''
-                        SELECT * FROM reservations
-                        WHERE equipment=? AND (start_datetime < ? AND end_datetime > ?)
-                    ''', (equipment, str(end_dt), str(start_dt)))
-                    conflict = c.fetchone()
+                    with engine.connect() as conn:
+                        result = conn.execute(text('''
+                            SELECT * FROM reservations
+                            WHERE equipment=:equipment
+                            AND start_datetime < :end
+                            AND end_datetime > :start
+                        '''), {"equipment": equipment, "start": str(start_dt), "end": str(end_dt)})
+                        conflict = result.fetchone()
 
                     if conflict:
                         st.error("⚠️ その時間は既に別の予約が入っています。")
-                        conn.close()
                     else:
-                        c.execute('''
-                            INSERT INTO reservations (nickname, equipment, start_datetime, end_datetime)
-                            VALUES (?, ?, ?, ?)
-                        ''', (nickname, equipment, str(start_dt), str(end_dt)))
-                        conn.commit()
-                        conn.close()
+                        with engine.connect() as conn:
+                            conn.execute(text('''
+                                INSERT INTO reservations (nickname, equipment, start_datetime, end_datetime)
+                                VALUES (:nickname, :equipment, :start, :end)
+                            '''), {"nickname": nickname, "equipment": equipment,
+                                   "start": str(start_dt), "end": str(end_dt)})
+                            conn.commit()
                         user_email = USERS[nickname]
                         mail_success = send_confirmation_email(user_email, nickname, equipment, start_dt, end_dt)
                         if mail_success:
@@ -226,11 +222,11 @@ if cal_result and cal_result.get("eventClick"):
     clicked = cal_result["eventClick"]["event"]
     clicked_id = int(clicked["id"])
 
-    conn = sqlite3.connect(DB_FILE)
-    result_df = pd.read_sql_query(
-        "SELECT * FROM reservations WHERE id=?", conn, params=(clicked_id,)
-    )
-    conn.close()
+    with engine.connect() as conn:
+        result_df = pd.read_sql(
+            text("SELECT * FROM reservations WHERE id=:id"),
+            conn, params={"id": clicked_id}
+        )
 
     if not result_df.empty:
         row = result_df.iloc[0]
@@ -247,11 +243,9 @@ if cal_result and cal_result.get("eventClick"):
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("🗑️ 削除する", disabled=not confirm, type="primary"):
-                    conn2 = sqlite3.connect(DB_FILE)
-                    c = conn2.cursor()
-                    c.execute("DELETE FROM reservations WHERE id=?", (int(row["id"]),))
-                    conn2.commit()
-                    conn2.close()
+                    with engine.connect() as conn2:
+                        conn2.execute(text("DELETE FROM reservations WHERE id=:id"), {"id": int(row["id"])})
+                        conn2.commit()
 
                     owner_email = USERS.get(row["nickname"])
                     if owner_email:
