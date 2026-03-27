@@ -115,18 +115,20 @@ def show_calendar_page(title, equipment_colors, page_key):
             with col2:
                 end_date = st.date_input("終了日", init_end.date())
                 end_time = st.time_input("終了時間", init_end.time(), step=3600)
-            if st.button("✅ 予約する", type="primary"):
-                start_dt = datetime.combine(start_date, start_time)
-                end_dt = datetime.combine(end_date, end_time)
-                if start_dt >= end_dt:
-                    st.error("終了日時は開始日時より後に設定してください。")
-                else:
-                    if check_conflict(equipment, start_dt, end_dt):
-                        st.error("⚠️ その時間は既に別の予約が入っています。")
+            _, col_center, _ = st.columns([1, 2, 1])
+            with col_center:
+                if st.button("✅ 予約する", type="primary", use_container_width=True):
+                    start_dt = datetime.combine(start_date, start_time)
+                    end_dt = datetime.combine(end_date, end_time)
+                    if start_dt >= end_dt:
+                        st.error("終了日時は開始日時より後に設定してください。")
                     else:
-                        insert_reservation(nickname, equipment, start_dt, end_dt)
-                        st.success("予約完了！")
-                        st.rerun()
+                        if check_conflict(equipment, start_dt, end_dt):
+                            st.error("⚠️ その時間は既に別の予約が入っています。")
+                        else:
+                            insert_reservation(nickname, equipment, start_dt, end_dt)
+                            st.success("予約完了！")
+                            st.rerun()
         show_new_reservation_dialog(init_start, init_end)
 
     if cal_result and cal_result.get("eventClick"):
@@ -143,7 +145,9 @@ def show_calendar_page(title, equipment_colors, page_key):
                 st.markdown(f"**終了：** {row['end_datetime']}")
                 st.markdown("---")
                 confirm = st.checkbox("本当に削除してよいですか？")
-                if st.button("🗑️ 削除する", disabled=not confirm, type="primary"):
-                    delete_reservation(int(row["id"]))
-                    st.rerun()
+                _, col_center, _ = st.columns([1, 2, 1])
+                with col_center:
+                    if st.button("🗑️ 削除する", disabled=not confirm, type="primary", use_container_width=True):
+                        delete_reservation(int(row["id"]))
+                        st.rerun()
             show_reservation_dialog(row)
