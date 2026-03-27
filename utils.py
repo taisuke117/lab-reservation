@@ -72,7 +72,7 @@ def show_calendar_page(title, equipment_colors, page_key):
         "slotDuration": "01:00:00",
         "slotLabelInterval": "01:00:00",
         "slotMinTime": "00:00:00",
-        "slotMaxTime": "23:00:00",
+        "slotMaxTime": "24:00:00",
         "scrollTime": "00:00:00",
         "expandRows": True,
         "contentHeight": "auto",
