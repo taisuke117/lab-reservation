@@ -106,7 +106,7 @@ def show_calendar_page(title, equipment_colors, page_key):
         @st.dialog("🆕 新規予約")
         def show_new_reservation_dialog(init_start, init_end):
             st.markdown(f"選択時間：**{init_start.strftime('%Y-%m-%d %H:%M')}** 〜 **{init_end.strftime('%Y-%m-%d %H:%M')}**")
-            nickname = st.selectbox("利用者", USERS)
+            nickname = st.selectbox("利用者", list(USERS.keys()))
             equipment = st.selectbox("機器を選択", equipment_list)
             col1, col2 = st.columns(2)
             with col1:
@@ -115,23 +115,18 @@ def show_calendar_page(title, equipment_colors, page_key):
             with col2:
                 end_date = st.date_input("終了日", init_end.date())
                 end_time = st.time_input("終了時間", init_end.time(), step=3600)
-            col3, col4 = st.columns(2)
-            with col3:
-                if st.button("✅ 予約する", type="primary"):
-                    start_dt = datetime.combine(start_date, start_time)
-                    end_dt = datetime.combine(end_date, end_time)
-                    if start_dt >= end_dt:
-                        st.error("終了日時は開始日時より後に設定してください。")
+            if st.button("✅ 予約する", type="primary"):
+                start_dt = datetime.combine(start_date, start_time)
+                end_dt = datetime.combine(end_date, end_time)
+                if start_dt >= end_dt:
+                    st.error("終了日時は開始日時より後に設定してください。")
+                else:
+                    if check_conflict(equipment, start_dt, end_dt):
+                        st.error("⚠️ その時間は既に別の予約が入っています。")
                     else:
-                        if check_conflict(equipment, start_dt, end_dt):
-                            st.error("⚠️ その時間は既に別の予約が入っています。")
-                        else:
-                            insert_reservation(nickname, equipment, start_dt, end_dt)
-                            st.success("予約完了！")
-                            st.rerun()
-            with col4:
-                if st.button("✖ キャンセル"):
-                    st.rerun()
+                        insert_reservation(nickname, equipment, start_dt, end_dt)
+                        st.success("予約完了！")
+                        st.rerun()
         show_new_reservation_dialog(init_start, init_end)
 
     if cal_result and cal_result.get("eventClick"):
@@ -148,12 +143,7 @@ def show_calendar_page(title, equipment_colors, page_key):
                 st.markdown(f"**終了：** {row['end_datetime']}")
                 st.markdown("---")
                 confirm = st.checkbox("本当に削除してよいですか？")
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button("🗑️ 削除する", disabled=not confirm, type="primary"):
-                        delete_reservation(int(row["id"]))
-                        st.rerun()
-                with col2:
-                    if st.button("✖ キャンセル"):
-                        st.rerun()
+                if st.button("🗑️ 削除する", disabled=not confirm, type="primary"):
+                    delete_reservation(int(row["id"]))
+                    st.rerun()
             show_reservation_dialog(row)
