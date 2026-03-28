@@ -8,8 +8,7 @@
 
 ## 🌐 アクセスURL
 
-https://lab-reservation-i3meluuqfwjkhwtqeut7m7.streamlit.app
-
+管理者に問い合わせてください。
 ---
 
 ## 📖 使い方
