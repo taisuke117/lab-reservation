@@ -62,7 +62,7 @@ Supabase（クラウドDB）
 
 Streamlit   https://share.streamlit.io/
 
-Supabase   https://supabase.com/dashboard/org/ghbztumvlhgoowzligja
+Supabase   https://supabase.com/
 
 
 ## 📁 ファイル構成
