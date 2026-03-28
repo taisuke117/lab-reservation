@@ -57,7 +57,8 @@ Supabase（クラウドDB）
 | Supabase (PostgreSQL) | 予約データの永続保存 |
 | Streamlit Cloud | 24時間稼働サーバー |
 | GitHub | コード管理 |
-
+https://share.streamlit.io/
+https://supabase.com/dashboard/org/ghbztumvlhgoowzligja
 ---
 
 ## 📁 ファイル構成
