@@ -16,7 +16,7 @@ with col1:
 
     if st.button("📦 包埋ロータリー・包埋センター", use_container_width=True, type="primary"):
         st.switch_page("pages/3_包埋ロータリー・包埋センター.py")
-    st.caption("包埋ロータリー／包埋センター")
+    st.caption("包埋ロータリー・包埋センター")
 
     st.markdown("")
 
