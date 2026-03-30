@@ -79,7 +79,6 @@ def show_calendar_page(title, equipment_colors, page_key):
         "slotMinTime": "00:00:00",
         "slotMaxTime": "24:00:00",
         "scrollTime": "00:00:00",
-        "slotEventOverlap": False, 
         "expandRows": True,
         "contentHeight": "auto",
     }
@@ -128,7 +127,12 @@ def show_calendar_page(title, equipment_colors, page_key):
         @st.dialog("🆕 新規予約")
         def show_new_reservation_dialog(init_start, init_end):
             st.markdown(f"選択時間：**{init_start.strftime('%Y-%m-%d %H:%M')}** 〜 **{init_end.strftime('%Y-%m-%d %H:%M')}**")
-            nickname = st.selectbox("利用者", USERS)
+
+            # 前回使った名前をURLパラメータから取得してデフォルトに
+            last_user = st.query_params.get("user", None)
+            default_index = USERS.index(last_user) if last_user and last_user in USERS else 0
+
+            nickname = st.selectbox("利用者", USERS, index=default_index)
             equipment = st.selectbox("機器を選択", equipment_list)
             col1, col2 = st.columns(2)
             with col1:
@@ -159,6 +163,7 @@ def show_calendar_page(title, equipment_colors, page_key):
                             st.error("⚠️ その時間は既に別の予約が入っています。")
                         else:
                             insert_reservation(nickname, equipment, start_dt, end_dt)
+                            st.query_params["user"] = nickname
                             st.success("予約完了！")
                             st.rerun()
         show_new_reservation_dialog(init_start, init_end)
