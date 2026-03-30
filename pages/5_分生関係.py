@@ -7,8 +7,8 @@ st.set_page_config(page_title="分生関係予約", layout="wide")
 st.title("🧬 分生関係 予約")
 
 equipment_colors = {
-    "分生エリア": "#EAB200",
-    "分生室": "#C97A07",
+    "分生エリア": "#C71585",
+    "分生室": "#3E2723",
 }
 
 show_calendar_page("分生関係", equipment_colors, "bunsei_calendar")
