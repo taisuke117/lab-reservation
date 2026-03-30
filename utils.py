@@ -4,12 +4,14 @@ import json
 from datetime import datetime, timedelta, date
 from streamlit_calendar import calendar
 from supabase import create_client
-from streamlit_cookies_controller import CookieController
+import extra_streamlit_components as stx
 
 # --- 設定読み込み ---
 USERS = json.loads(st.secrets["USERS"])
 supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
-cookie = CookieController()
+
+def get_cookie_manager():
+    return stx.CookieManager()
 
 def load_data():
     response = supabase.table("reservations").select("*").order("start_datetime").execute()
@@ -46,8 +48,16 @@ def show_calendar_page(title, equipment_colors, page_key):
     if st.button("🏠 トップに戻る"):
         st.switch_page("Home.py")
 
+    # クッキーマネージャー（ページ描画の最上部で呼ぶ）
+    cookie_manager = get_cookie_manager()
+
+    # 保留中のクッキー保存があれば実行（ダイアログの外で行う）
+    if "_pending_cookie_user" in st.session_state:
+        cookie_manager.set("lab_user", st.session_state.pop("_pending_cookie_user"))
+
+    # クッキーから前回の名前を取得
     try:
-        saved_user = cookie.get("lab_user")
+        saved_user = cookie_manager.get("lab_user")
         if saved_user and saved_user in USERS:
             st.session_state["lab_user"] = saved_user
         elif "lab_user" not in st.session_state:
@@ -173,8 +183,9 @@ def show_calendar_page(title, equipment_colors, page_key):
                             st.error("⚠️ その時間は既に別の予約が入っています。")
                         else:
                             insert_reservation(nickname, equipment, start_dt, end_dt)
+                            # session_stateに保存（クッキー保存は次のレンダリングで実行）
                             st.session_state["lab_user"] = nickname
-                            cookie.set("lab_user", nickname)
+                            st.session_state["_pending_cookie_user"] = nickname
                             st.success("予約完了！")
                             st.rerun()
         show_new_reservation_dialog(init_start, init_end)
