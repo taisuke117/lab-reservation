@@ -11,9 +11,7 @@ USERS = json.loads(st.secrets["USERS"])
 supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
 
 # クッキーコントローラー（1回だけ生成）
-@st.cache_resource
-def get_cookie_controller():
-    return CookieController()
+cookie = CookieController()
 
 def load_data():
     response = supabase.table("reservations").select("*").order("start_datetime").execute()
