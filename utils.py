@@ -79,6 +79,7 @@ def show_calendar_page(title, equipment_colors, page_key):
         "slotMinTime": "00:00:00",
         "slotMaxTime": "24:00:00",
         "scrollTime": "00:00:00",
+        "slotEventOverlap": False, 
         "expandRows": True,
         "contentHeight": "auto",
     }
