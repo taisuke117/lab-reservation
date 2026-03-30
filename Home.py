@@ -10,7 +10,7 @@ col1, col2 = st.columns(2)
 with col1:
     if st.button("🔪 ミクロトーム", use_container_width=True, type="primary"):
         st.switch_page("pages/1_ミクロトーム.py")
-    st.caption("回転式ミクロトーム（旧型）／回転式ミクロトーム（新型）／滑走型ミクロトーム")
+    st.caption("回転式ミクロトーム（A）／回転式ミクロトーム（B）／滑走型ミクロトーム")
 
     st.markdown("")
 
