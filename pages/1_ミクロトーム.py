@@ -7,9 +7,9 @@ st.set_page_config(page_title="ミクロトーム予約", layout="wide")
 st.title("🔪 ミクロトーム 予約")
 
 equipment_colors = {
-    "回転式ミクロトーム（A）": "#002060",
-    "回転式ミクロトーム（B）": "#0B76A0",
-    "滑走型ミクロトーム": "#4E95D9",
+    "回転式ミクロトーム（A）": "#8B0000",
+    "回転式ミクロトーム（B）": "#A0522D",
+    "滑走型ミクロトーム": "#556B2F",
 }
 
 show_calendar_page("ミクロトーム", equipment_colors, "microtome_calendar")
