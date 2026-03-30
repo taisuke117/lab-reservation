@@ -35,7 +35,6 @@ def check_conflict(equipment, start_dt, end_dt):
     return False
 
 def _combine_with_hour(d, hour):
-    """hour=24 を翌日0時として datetime を返す"""
     if hour == 24:
         return datetime.combine(d + timedelta(days=1), datetime.min.time())
     return datetime.combine(d, datetime.min.time().replace(hour=hour))
@@ -46,8 +45,14 @@ def show_calendar_page(title, equipment_colors, page_key):
     if st.button("🏠 トップに戻る"):
         st.switch_page("Home.py")
 
-    # localStorageから前回の名前を取得（ページ読み込み時）
-    saved_user = st_javascript("localStorage.getItem('lab_user')")
+    # --- localStorageからの読み込み（session_stateにキャッシュ）---
+    if "lab_user" not in st.session_state:
+        saved_user = st_javascript("localStorage.getItem('lab_user') || ''")
+        # st_javascriptは初回None、2回目以降に値が返る
+        if saved_user and isinstance(saved_user, str) and saved_user in USERS:
+            st.session_state["lab_user"] = saved_user
+        else:
+            st.session_state["lab_user"] = ""
 
     df_all = load_data()
     df = df_all[df_all["equipment"].isin(equipment_list)] if not df_all.empty else df_all
@@ -132,8 +137,8 @@ def show_calendar_page(title, equipment_colors, page_key):
         def show_new_reservation_dialog(init_start, init_end):
             st.markdown(f"選択時間：**{init_start.strftime('%Y-%m-%d %H:%M')}** 〜 **{init_end.strftime('%Y-%m-%d %H:%M')}**")
 
-            # localStorageの値をデフォルトに
-            default_index = USERS.index(saved_user) if saved_user and saved_user in USERS else 0
+            saved = st.session_state.get("lab_user", "")
+            default_index = USERS.index(saved) if saved and saved in USERS else 0
 
             nickname = st.selectbox("利用者", USERS, index=default_index)
             equipment = st.selectbox("機器を選択", equipment_list)
@@ -166,7 +171,8 @@ def show_calendar_page(title, equipment_colors, page_key):
                             st.error("⚠️ その時間は既に別の予約が入っています。")
                         else:
                             insert_reservation(nickname, equipment, start_dt, end_dt)
-                            # localStorageに名前を保存
+                            # session_stateとlocalStorageの両方に保存
+                            st.session_state["lab_user"] = nickname
                             st_javascript(f"localStorage.setItem('lab_user', '{nickname}')")
                             st.success("予約完了！")
                             st.rerun()
