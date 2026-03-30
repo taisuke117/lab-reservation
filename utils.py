@@ -40,21 +40,9 @@ def _combine_with_hour(d, hour):
 
 def show_calendar_page(title, equipment_colors, page_key):
     equipment_list = list(equipment_colors.keys())
-
     st.caption("📌 空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・削除")
     if st.button("🏠 トップに戻る"):
         st.switch_page("Home.py")
-
-    # ページ上部に常時ユーザー選択欄
-    current_user = st.session_state.get("lab_user", USERS[0])
-    default_index = USERS.index(current_user) if current_user in USERS else 0
-    selected_user = st.selectbox(
-        "👤 利用者（自分の名前を選んでください）",
-        USERS,
-        index=default_index,
-        key=f"user_select_{page_key}"
-    )
-    st.session_state["lab_user"] = selected_user
 
     df_all = load_data()
     df = df_all[df_all["equipment"].isin(equipment_list)] if not df_all.empty else df_all
@@ -139,11 +127,12 @@ def show_calendar_page(title, equipment_colors, page_key):
         def show_new_reservation_dialog(init_start, init_end):
             st.markdown(f"選択時間：**{init_start.strftime('%Y-%m-%d %H:%M')}** 〜 **{init_end.strftime('%Y-%m-%d %H:%M')}**")
 
-            # ページ上部で選択済みの名前をデフォルトに
-            saved = st.session_state.get("lab_user", USERS[0])
-            default_index = USERS.index(saved) if saved in USERS else 0
+            # 先頭に「名前を選択してください」を追加
+            user_options = ["名前を選択してください"] + USERS
+            saved = st.session_state.get("lab_user", "")
+            default_index = user_options.index(saved) if saved and saved in user_options else 0
 
-            nickname = st.selectbox("利用者", USERS, index=default_index)
+            nickname = st.selectbox("利用者", user_options, index=default_index)
             equipment = st.selectbox("機器を選択", equipment_list)
             col1, col2 = st.columns(2)
             with col1:
@@ -165,18 +154,21 @@ def show_calendar_page(title, equipment_colors, page_key):
             _, col_center, _ = st.columns([1, 2, 1])
             with col_center:
                 if st.button("✅ 予約する", type="primary", use_container_width=True):
-                    start_dt = _combine_with_hour(start_date, start_hour)
-                    end_dt = _combine_with_hour(end_date, end_hour)
-                    if start_dt >= end_dt:
-                        st.error("終了日時は開始日時より後に設定してください。")
+                    if nickname == "名前を選択してください":
+                        st.error("利用者名を選択してください。")
                     else:
-                        if check_conflict(equipment, start_dt, end_dt):
-                            st.error("⚠️ その時間は既に別の予約が入っています。")
+                        start_dt = _combine_with_hour(start_date, start_hour)
+                        end_dt = _combine_with_hour(end_date, end_hour)
+                        if start_dt >= end_dt:
+                            st.error("終了日時は開始日時より後に設定してください。")
                         else:
-                            insert_reservation(nickname, equipment, start_dt, end_dt)
-                            st.session_state["lab_user"] = nickname
-                            st.success("予約完了！")
-                            st.rerun()
+                            if check_conflict(equipment, start_dt, end_dt):
+                                st.error("⚠️ その時間は既に別の予約が入っています。")
+                            else:
+                                insert_reservation(nickname, equipment, start_dt, end_dt)
+                                st.session_state["lab_user"] = nickname
+                                st.success("予約完了！")
+                                st.rerun()
         show_new_reservation_dialog(init_start, init_end)
 
     if cal_result and cal_result.get("eventClick"):
