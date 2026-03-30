@@ -49,10 +49,14 @@ def show_calendar_page(title, equipment_colors, page_key):
         st.switch_page("Home.py")
 
     # クッキーから前回の名前を取得
+    try:
     saved_user = cookie.get("lab_user")
     if saved_user and saved_user in USERS:
         st.session_state["lab_user"] = saved_user
     elif "lab_user" not in st.session_state:
+        st.session_state["lab_user"] = ""
+except Exception:
+    if "lab_user" not in st.session_state:
         st.session_state["lab_user"] = ""
 
     df_all = load_data()
