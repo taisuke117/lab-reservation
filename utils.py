@@ -4,11 +4,16 @@ import json
 from datetime import datetime, timedelta, date
 from streamlit_calendar import calendar
 from supabase import create_client
-from streamlit_javascript import st_javascript
+from streamlit_cookies_controller import CookieController
 
 # --- 設定読み込み ---
 USERS = json.loads(st.secrets["USERS"])
 supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
+
+# クッキーコントローラー（1回だけ生成）
+@st.cache_resource
+def get_cookie_controller():
+    return CookieController()
 
 def load_data():
     response = supabase.table("reservations").select("*").order("start_datetime").execute()
@@ -45,10 +50,10 @@ def show_calendar_page(title, equipment_colors, page_key):
     if st.button("🏠 トップに戻る"):
         st.switch_page("Home.py")
 
-    # --- localStorageからの読み込み（session_stateにキャッシュ）---
-    # 毎回localStorageを読みに行き、値が取れたときだけsession_stateを上書きする
-    saved_user = st_javascript("localStorage.getItem('lab_user') || ''")
-    if saved_user and isinstance(saved_user, str) and saved_user in USERS:
+    # クッキーから前回の名前を取得
+    cookie = get_cookie_controller()
+    saved_user = cookie.get("lab_user")
+    if saved_user and saved_user in USERS:
         st.session_state["lab_user"] = saved_user
     elif "lab_user" not in st.session_state:
         st.session_state["lab_user"] = ""
@@ -170,9 +175,9 @@ def show_calendar_page(title, equipment_colors, page_key):
                             st.error("⚠️ その時間は既に別の予約が入っています。")
                         else:
                             insert_reservation(nickname, equipment, start_dt, end_dt)
-                            # session_stateとlocalStorageの両方に保存
+                            # クッキーとsession_stateの両方に保存
                             st.session_state["lab_user"] = nickname
-                            st_javascript(f"localStorage.setItem('lab_user', '{nickname}')")
+                            cookie.set("lab_user", nickname)
                             st.success("予約完了！")
                             st.rerun()
         show_new_reservation_dialog(init_start, init_end)
