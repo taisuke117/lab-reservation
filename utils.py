@@ -33,6 +33,12 @@ def check_conflict(equipment, start_dt, end_dt):
             return True
     return False
 
+def _combine_with_hour(d, hour):
+    """hour=24 を翌日0時として datetime を返す"""
+    if hour == 24:
+        return datetime.combine(d + timedelta(days=1), datetime.min.time())
+    return datetime.combine(d, datetime.min.time().replace(hour=hour))
+
 def show_calendar_page(title, equipment_colors, page_key):
     equipment_list = list(equipment_colors.keys())
     st.caption("📌 空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・削除")
@@ -54,7 +60,6 @@ def show_calendar_page(title, equipment_colors, page_key):
                 "borderColor": equipment_colors.get(row['equipment'], "#808080")
             })
 
-    # カレンダーオプション（slotMinTime/slotMaxTimeをall-day計算に使用）
     calendar_options = {
         "headerToolbar": {
             "left": "today prev,next",
@@ -80,7 +85,6 @@ def show_calendar_page(title, equipment_colors, page_key):
 
     cal_result = calendar(events=events, options=calendar_options, key=page_key)
 
-    # slotMinTime・slotMaxTimeをパース（all-day計算用）
     slot_min_h = int(calendar_options["slotMinTime"][:2])
     slot_max_h = int(calendar_options["slotMaxTime"][:2])
 
@@ -104,9 +108,7 @@ def show_calendar_page(title, equipment_colors, page_key):
             is_all_day = cal_result["dateClick"].get("allDay", False)
             init_start = datetime.fromisoformat(raw[:16])
             if is_all_day:
-                # 開始はslotMinTime（例：07:00）
                 init_start = init_start.replace(hour=slot_min_h, minute=0, second=0)
-                # 終了はslotMaxTime（24超えの場合は翌日に繰り越し）
                 if slot_max_h >= 24:
                     extra_days = slot_max_h // 24
                     end_h = slot_max_h % 24
@@ -130,15 +132,25 @@ def show_calendar_page(title, equipment_colors, page_key):
             col1, col2 = st.columns(2)
             with col1:
                 start_date = st.date_input("開始日", init_start.date())
-                start_time = st.time_input("開始時間", init_start.time(), step=3600)
+                start_hour = st.selectbox(
+                    "開始時間",
+                    list(range(25)),
+                    index=init_start.hour,
+                    format_func=lambda h: f"{h:02d}:00"
+                )
             with col2:
                 end_date = st.date_input("終了日", init_end.date())
-                end_time = st.time_input("終了時間", init_end.time(), step=3600)
+                end_hour = st.selectbox(
+                    "終了時間",
+                    list(range(25)),
+                    index=min(init_end.hour, 24),
+                    format_func=lambda h: f"{h:02d}:00"
+                )
             _, col_center, _ = st.columns([1, 2, 1])
             with col_center:
                 if st.button("✅ 予約する", type="primary", use_container_width=True):
-                    start_dt = datetime.combine(start_date, start_time)
-                    end_dt = datetime.combine(end_date, end_time)
+                    start_dt = _combine_with_hour(start_date, start_hour)
+                    end_dt = _combine_with_hour(end_date, end_hour)
                     if start_dt >= end_dt:
                         st.error("終了日時は開始日時より後に設定してください。")
                     else:
