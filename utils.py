@@ -9,8 +9,6 @@ from streamlit_cookies_controller import CookieController
 # --- 設定読み込み ---
 USERS = json.loads(st.secrets["USERS"])
 supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
-
-# クッキーコントローラー（モジュールレベルで1回だけ生成）
 cookie = CookieController()
 
 def load_data():
@@ -48,16 +46,15 @@ def show_calendar_page(title, equipment_colors, page_key):
     if st.button("🏠 トップに戻る"):
         st.switch_page("Home.py")
 
-    # クッキーから前回の名前を取得
     try:
-    saved_user = cookie.get("lab_user")
-    if saved_user and saved_user in USERS:
-        st.session_state["lab_user"] = saved_user
-    elif "lab_user" not in st.session_state:
-        st.session_state["lab_user"] = ""
-except Exception:
-    if "lab_user" not in st.session_state:
-        st.session_state["lab_user"] = ""
+        saved_user = cookie.get("lab_user")
+        if saved_user and saved_user in USERS:
+            st.session_state["lab_user"] = saved_user
+        elif "lab_user" not in st.session_state:
+            st.session_state["lab_user"] = ""
+    except Exception:
+        if "lab_user" not in st.session_state:
+            st.session_state["lab_user"] = ""
 
     df_all = load_data()
     df = df_all[df_all["equipment"].isin(equipment_list)] if not df_all.empty else df_all
