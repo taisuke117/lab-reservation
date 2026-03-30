@@ -46,13 +46,12 @@ def show_calendar_page(title, equipment_colors, page_key):
         st.switch_page("Home.py")
 
     # --- localStorageからの読み込み（session_stateにキャッシュ）---
-    if "lab_user" not in st.session_state:
-        saved_user = st_javascript("localStorage.getItem('lab_user') || ''")
-        # st_javascriptは初回None、2回目以降に値が返る
-        if saved_user and isinstance(saved_user, str) and saved_user in USERS:
-            st.session_state["lab_user"] = saved_user
-        else:
-            st.session_state["lab_user"] = ""
+    # 毎回localStorageを読みに行き、値が取れたときだけsession_stateを上書きする
+    saved_user = st_javascript("localStorage.getItem('lab_user') || ''")
+    if saved_user and isinstance(saved_user, str) and saved_user in USERS:
+        st.session_state["lab_user"] = saved_user
+    elif "lab_user" not in st.session_state:
+        st.session_state["lab_user"] = ""
 
     df_all = load_data()
     df = df_all[df_all["equipment"].isin(equipment_list)] if not df_all.empty else df_all
