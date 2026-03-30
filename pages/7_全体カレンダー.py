@@ -10,12 +10,12 @@ if st.button("🏠 トップに戻る"):
     st.switch_page("Home.py")
 
 ALL_EQUIPMENT_COLORS = {
-    "回転式ミクロトーム（A）": "#C00000",,
-    "回転式ミクロトーム（B）": "#78206E",
-    "滑走型ミクロトーム":      "#D86ECC",
-    "実験台１": "#3498DB",
-    "実験台２": "#2980B9",
-    "実験台３": "#5DADE2",
+    "回転式ミクロトーム（A）": "#E74C3C",
+    "回転式ミクロトーム（B）": "#C0392B",
+    "滑走型ミクロトーム":      "#FF6B6B",
+    "実験台１": "#C00000",
+    "実験台２": "#78206E",
+    "実験台３": "#D86ECC",
     "包埋ロータリー・包埋センター": "#F39C12",
     "バーチャル撮影装置": "#9B59B6",
     "分生エリア": "#27AE60",
@@ -63,22 +63,19 @@ calendar_options = {
 
 cal_result = calendar(events=events, options=calendar_options, key="overview_calendar")
 
-# イベントクリックで詳細表示
+@st.dialog("📋 予約の詳細")
+def show_detail_dialog(row):
+    st.markdown(f"**利用者：** {row['nickname']}")
+    st.markdown(f"**機器：** {row['equipment']}")
+    st.markdown(f"**開始：** {row['start_datetime']}")
+    st.markdown(f"**終了：** {row['end_datetime']}")
+
 if cal_result and cal_result.get("eventClick"):
     clicked_id = int(cal_result["eventClick"]["event"]["id"])
     df_reload = load_data()
     df_click = df_reload[df_reload["id"] == clicked_id]
     if not df_click.empty:
-        row = df_click.iloc[0]
-
-        @st.dialog("📋 予約の詳細")
-        def show_detail_dialog(row):
-            st.markdown(f"**利用者：** {row['nickname']}")
-            st.markdown(f"**機器：** {row['equipment']}")
-            st.markdown(f"**開始：** {row['start_datetime']}")
-            st.markdown(f"**終了：** {row['end_datetime']}")
-
-        show_detail_dialog(row)
+        show_detail_dialog(df_click.iloc[0])
 
 st.markdown("---")
 st.caption("予約・削除はトップページから各カテゴリを選んで行ってください。")
