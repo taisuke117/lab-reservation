@@ -4,14 +4,10 @@ import json
 from datetime import datetime, timedelta, date
 from streamlit_calendar import calendar
 from supabase import create_client
-import extra_streamlit_components as stx
 
 # --- 設定読み込み ---
 USERS = json.loads(st.secrets["USERS"])
 supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
-
-def get_cookie_manager():
-    return stx.CookieManager()
 
 def load_data():
     response = supabase.table("reservations").select("*").order("start_datetime").execute()
@@ -44,27 +40,21 @@ def _combine_with_hour(d, hour):
 
 def show_calendar_page(title, equipment_colors, page_key):
     equipment_list = list(equipment_colors.keys())
+
     st.caption("📌 空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・削除")
     if st.button("🏠 トップに戻る"):
         st.switch_page("Home.py")
 
-    # クッキーマネージャー（ページ描画の最上部で呼ぶ）
-    cookie_manager = get_cookie_manager()
-
-    # 保留中のクッキー保存があれば実行（ダイアログの外で行う）
-    if "_pending_cookie_user" in st.session_state:
-        cookie_manager.set("lab_user", st.session_state.pop("_pending_cookie_user"))
-
-    # クッキーから前回の名前を取得
-    try:
-        saved_user = cookie_manager.get("lab_user")
-        if saved_user and saved_user in USERS:
-            st.session_state["lab_user"] = saved_user
-        elif "lab_user" not in st.session_state:
-            st.session_state["lab_user"] = ""
-    except Exception:
-        if "lab_user" not in st.session_state:
-            st.session_state["lab_user"] = ""
+    # ページ上部に常時ユーザー選択欄
+    current_user = st.session_state.get("lab_user", USERS[0])
+    default_index = USERS.index(current_user) if current_user in USERS else 0
+    selected_user = st.selectbox(
+        "👤 利用者（自分の名前を選んでください）",
+        USERS,
+        index=default_index,
+        key=f"user_select_{page_key}"
+    )
+    st.session_state["lab_user"] = selected_user
 
     df_all = load_data()
     df = df_all[df_all["equipment"].isin(equipment_list)] if not df_all.empty else df_all
@@ -149,8 +139,9 @@ def show_calendar_page(title, equipment_colors, page_key):
         def show_new_reservation_dialog(init_start, init_end):
             st.markdown(f"選択時間：**{init_start.strftime('%Y-%m-%d %H:%M')}** 〜 **{init_end.strftime('%Y-%m-%d %H:%M')}**")
 
-            saved = st.session_state.get("lab_user", "")
-            default_index = USERS.index(saved) if saved and saved in USERS else 0
+            # ページ上部で選択済みの名前をデフォルトに
+            saved = st.session_state.get("lab_user", USERS[0])
+            default_index = USERS.index(saved) if saved in USERS else 0
 
             nickname = st.selectbox("利用者", USERS, index=default_index)
             equipment = st.selectbox("機器を選択", equipment_list)
@@ -183,9 +174,7 @@ def show_calendar_page(title, equipment_colors, page_key):
                             st.error("⚠️ その時間は既に別の予約が入っています。")
                         else:
                             insert_reservation(nickname, equipment, start_dt, end_dt)
-                            # session_stateに保存（クッキー保存は次のレンダリングで実行）
                             st.session_state["lab_user"] = nickname
-                            st.session_state["_pending_cookie_user"] = nickname
                             st.success("予約完了！")
                             st.rerun()
         show_new_reservation_dialog(init_start, init_end)
