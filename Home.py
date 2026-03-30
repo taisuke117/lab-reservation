@@ -25,9 +25,9 @@ with col1:
     st.caption("分生エリア／分生室")
 
 with col2:
-    if st.button("🎨 染色系列", use_container_width=True, type="primary"):
+    if st.button("🎨 実験台（実験室）", use_container_width=True, type="primary"):
         st.switch_page("pages/2_染色系列.py")
-    st.caption("染色系列")
+    st.caption("実験台１／実験台２／実験台３")
 
     st.markdown("")
 
