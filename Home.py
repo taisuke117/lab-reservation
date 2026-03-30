@@ -42,5 +42,10 @@ with col2:
     st.caption("安全キャビネット／クリーンベンチ")
 
 st.markdown("---")
+# 全体カレンダーへのボタン（一番下）
+if st.button("📅 全体カレンダーを見る", use_container_width=True):
+    st.switch_page("pages/0_全体カレンダー.py")
+
+st.markdown("---")
 st.caption("📌 各カテゴリページでカレンダーの空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・削除")
 st.caption("📌 作成者・管理者　Taisuke Hani 　https://github.com/taisuke117/lab-reservation　v2.260327")
