@@ -31,9 +31,14 @@ events = []
 if not df.empty:
     for _, row in df.iterrows():
         color = ALL_EQUIPMENT_COLORS.get(row["equipment"], "#808080")
+        notes_val = str(row.get('notes', '')).strip()
+        if notes_val and notes_val != "nan":
+            title_str = f"{row['nickname']} ({row['equipment']}) 📝{notes_val}"
+        else:
+            title_str = f"{row['nickname']} ({row['equipment']})"
         events.append({
             "id": str(row["id"]),
-            "title": f"{row['nickname']} ({row['equipment']})",
+            "title": title_str,
             "start": row["start_datetime"],
             "end":   row["end_datetime"],
             "backgroundColor": color,
@@ -70,6 +75,9 @@ def show_detail_dialog(row):
     st.markdown(f"**機器：** {row['equipment']}")
     st.markdown(f"**開始：** {row['start_datetime']}")
     st.markdown(f"**終了：** {row['end_datetime']}")
+    notes_val = str(row.get('notes', '')).strip()
+    if notes_val and notes_val != "nan":
+        st.markdown(f"**備考：** {notes_val}")
 
 if cal_result and cal_result.get("eventClick"):
     clicked_id = int(cal_result["eventClick"]["event"]["id"])
