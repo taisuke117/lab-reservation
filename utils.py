@@ -152,7 +152,7 @@ def show_calendar_page(title, equipment_colors, page_key):
                     format_func=lambda h: f"{h:02d}:00"
                 )
 
-            notes = st.text_area("備考（任意）", placeholder="例：午前中のみ使用予定", height=80)
+            notes = st.text_area("備考（任意）", placeholder="メモ", height=80)
 
             _, col_center, _ = st.columns([1, 2, 1])
             with col_center:
