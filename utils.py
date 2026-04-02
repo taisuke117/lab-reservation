@@ -21,7 +21,7 @@ def insert_reservation(nickname, equipment, start_dt, end_dt, notes=""):
         "equipment": equipment,
         "start_datetime": str(start_dt),
         "end_datetime": str(end_dt),
-        "notes": notes
+        "notes": notes if notes and notes.strip() else " "
     }).execute()
 
 def delete_reservation(reservation_id):
