@@ -13,14 +13,15 @@ def load_data():
     response = supabase.table("reservations").select("*").order("start_datetime").execute()
     if response.data:
         return pd.DataFrame(response.data)
-    return pd.DataFrame(columns=["id", "nickname", "equipment", "start_datetime", "end_datetime"])
+    return pd.DataFrame(columns=["id", "nickname", "equipment", "start_datetime", "end_datetime", "notes"])
 
-def insert_reservation(nickname, equipment, start_dt, end_dt):
+def insert_reservation(nickname, equipment, start_dt, end_dt, notes=""):
     supabase.table("reservations").insert({
         "nickname": nickname,
         "equipment": equipment,
         "start_datetime": str(start_dt),
-        "end_datetime": str(end_dt)
+        "end_datetime": str(end_dt),
+        "notes": notes
     }).execute()
 
 def delete_reservation(reservation_id):
@@ -127,7 +128,6 @@ def show_calendar_page(title, equipment_colors, page_key):
         def show_new_reservation_dialog(init_start, init_end):
             st.markdown(f"選択時間：**{init_start.strftime('%Y-%m-%d %H:%M')}** 〜 **{init_end.strftime('%Y-%m-%d %H:%M')}**")
 
-            # 先頭に「名前を選択してください」を追加
             user_options = ["名前を選択してください"] + USERS
             saved = st.session_state.get("lab_user", "")
             default_index = user_options.index(saved) if saved and saved in user_options else 0
@@ -151,6 +151,9 @@ def show_calendar_page(title, equipment_colors, page_key):
                     index=min(init_end.hour, 24),
                     format_func=lambda h: f"{h:02d}:00"
                 )
+
+            notes = st.text_area("備考（任意）", placeholder="例：午前中のみ使用予定", height=80)
+
             _, col_center, _ = st.columns([1, 2, 1])
             with col_center:
                 if st.button("✅ 予約する", type="primary", use_container_width=True):
@@ -165,7 +168,7 @@ def show_calendar_page(title, equipment_colors, page_key):
                             if check_conflict(equipment, start_dt, end_dt):
                                 st.error("⚠️ その時間は既に別の予約が入っています。")
                             else:
-                                insert_reservation(nickname, equipment, start_dt, end_dt)
+                                insert_reservation(nickname, equipment, start_dt, end_dt, notes)
                                 st.session_state["lab_user"] = nickname
                                 st.success("予約完了！")
                                 st.rerun()
@@ -183,6 +186,9 @@ def show_calendar_page(title, equipment_colors, page_key):
                 st.markdown(f"**機器：** {row['equipment']}")
                 st.markdown(f"**開始：** {row['start_datetime']}")
                 st.markdown(f"**終了：** {row['end_datetime']}")
+                notes_val = row.get('notes', '')
+                if notes_val:
+                    st.markdown(f"**備考：** {notes_val}")
                 st.markdown("---")
                 confirm = st.checkbox("本当に削除してよいですか？")
                 _, col_center, _ = st.columns([1, 2, 1])
