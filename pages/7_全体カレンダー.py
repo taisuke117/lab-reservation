@@ -1,6 +1,22 @@
 import streamlit as st
 from utils import load_data
 from streamlit_calendar import calendar
+import streamlit as st
+
+st.set_page_config(layout="wide")
+st.title("📅 全体カレンダー（すべての機器）")
+
+# ↓↓↓ これを追加 ↓↓↓
+st.markdown("""
+<style>
+/* streamlit-calendar のiframe高さを内容に合わせて伸ばす */
+div[data-testid="stCustomComponentV1"] > iframe {
+    min-height: 900px;
+    height: auto !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 
 st.set_page_config(page_title="全体カレンダー", layout="wide")
 st.title("📅 全体カレンダー（すべての機器）")
@@ -63,7 +79,7 @@ calendar_options = {
     "slotMinTime": "00:00:00",
     "slotMaxTime": "24:00:00",
     "scrollTime": "00:00:00",
-    "expandRows": True,
+    "expandRows": False,      # ← True → False
     "contentHeight": "auto",
 }
 
