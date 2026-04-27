@@ -66,7 +66,7 @@ calendar_options = {
         "center": "title",
         "right":  "dayGridMonth,timeGridWeek,timeGridDay",
     },
-    "initialView": "timeGridWeek",
+    "initialView": "dayGridMonth",   # ← ここを変更（timeGridWeek → dayGridMonth）
     "navLinks": True,
     "editable": False,
     "selectable": False,
@@ -78,11 +78,28 @@ calendar_options = {
     "slotMinTime": "00:00:00",
     "slotMaxTime": "24:00:00",
     "scrollTime": "00:00:00",
-    "expandRows": False,      # ← True → False
+    "expandRows": False,             # ← False のまま維持
     "contentHeight": "auto",
 }
 
-cal_result = calendar(events=events, options=calendar_options, key="overview_calendar")
+custom_css = """
+.fc-scroller {
+    overflow: visible !important;
+}
+.fc-scroller-harness {
+    overflow: visible !important;
+}
+.fc-daygrid-body {
+    width: 100% !important;
+}
+"""
+
+cal_result = calendar(
+    events=events,
+    options=calendar_options,
+    custom_css=custom_css,   # ← 追加
+    key="overview_calendar",
+)
 
 @st.dialog("📋 予約の詳細")
 def show_detail_dialog(row):
