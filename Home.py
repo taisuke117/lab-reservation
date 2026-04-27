@@ -48,4 +48,4 @@ if st.button("📅 全体カレンダーを見る", use_container_width=True):
 
 st.markdown("---")
 st.caption("📌 各カテゴリページでカレンダーの空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・削除")
-st.caption("📌 作成者・管理者　Taisuke Hani 　https://github.com/taisuke117/lab-reservation　v2.260402")
+st.caption("📌 作成者・管理者　Taisuke Hani 　https://github.com/taisuke117/lab-reservation　v2.260427")
