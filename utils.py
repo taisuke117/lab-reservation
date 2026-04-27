@@ -78,27 +78,28 @@ def show_calendar_page(title, equipment_colors, page_key):
             })
 
     calendar_options = {
-        "headerToolbar": {
-            "left": "today prev,next",
-            "center": "title",
-            "right": "dayGridMonth,timeGridWeek,timeGridDay",
-        },
-        "initialView": "timeGridWeek",
-        "navLinks": True,
-        "editable": False,
-        "selectable": True,
-        "selectMinDistance": 0,
-        "timeZone": "Asia/Tokyo",
-        "slotLabelFormat": {"hour": "2-digit", "minute": "2-digit", "hour12": False},
-        "eventTimeFormat": {"hour": "2-digit", "minute": "2-digit", "hour12": False},
-        "slotDuration": "01:00:00",
-        "slotLabelInterval": "01:00:00",
-        "slotMinTime": "00:00:00",
-        "slotMaxTime": "24:00:00",
-        "scrollTime": "00:00:00",
-        "expandRows": True,
-        "contentHeight": "auto",
-    }
+    "headerToolbar": {
+        "left": "today prev,next",
+        "center": "title",
+        "right": "dayGridMonth,timeGridWeek,timeGridDay",
+    },
+    "initialView": "timeGridWeek",
+    "navLinks": True,
+    "editable": False,
+    "selectable": True,
+    "selectMinDistance": 0,
+    "timeZone": "Asia/Tokyo",
+    "slotLabelFormat": {"hour": "2-digit", "minute": "2-digit", "hour12": False},
+    "eventTimeFormat": {"hour": "2-digit", "minute": "2-digit", "hour12": False},
+    "slotDuration": "01:00:00",
+    "slotLabelInterval": "01:00:00",
+    "slotMinTime": "00:00:00",
+    "slotMaxTime": "24:00:00",
+    "scrollTime": "00:00:00",
+    "expandRows": False,          # ← True から False に変更（month表示との干渉を防ぐ）
+    "contentHeight": "auto",      # ← そのまま維持
+    "dayMaxEvents": True,         # ← 追加：多すぎるイベントは"+N more"に折りたたむ
+}
 
     cal_result = calendar(events=events, options=calendar_options, key=page_key)
 
