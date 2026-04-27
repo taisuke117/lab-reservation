@@ -4,7 +4,6 @@ from streamlit_calendar import calendar
 import streamlit as st
 
 st.set_page_config(layout="wide")
-st.title("📅 全体カレンダー（すべての機器）")
 
 # ↓↓↓ これを追加 ↓↓↓
 st.markdown("""
