@@ -61,7 +61,7 @@ Supabase（クラウドDB）
 
 ---
 
-Streamlit   https://share.streamlit.io/
+Streamlit   https://share.streamlit.io/  
 Supabase   https://supabase.com/
 
 ## 📁 ファイル構成
