@@ -27,7 +27,7 @@ with col1:
 with col2:
     if st.button("🎨 実験台（実験室）", use_container_width=True, type="primary"):
         st.switch_page("pages/2_実験台（実験室）.py")
-    st.caption("実験台１／実験台２／実験台３")
+    st.caption("実験台１／実験台２／実験台３ (廊下側から窓側に向かって1, 2, 3)")
 
     st.markdown("")
 
