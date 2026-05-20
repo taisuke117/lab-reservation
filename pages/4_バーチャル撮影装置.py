@@ -2,8 +2,10 @@ import streamlit as st
 import sys
 sys.path.append("/mount/src/lab-reservation")
 from utils import show_calendar_page
+from utils import add_noindex
 
 st.set_page_config(page_title="バーチャル撮影装置予約", layout="wide")
+add_noindex()
 st.title("🎥 バーチャル撮影装置 予約")
 
 equipment_colors = {
