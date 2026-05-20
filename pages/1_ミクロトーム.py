@@ -4,7 +4,7 @@ sys.path.append("/mount/src/lab-reservation")
 from utils import show_calendar_page
 from utils import add_noindex
 
-st.set_page_config(page_title="ミクロトーム予約", layout="wide")
+st.set_page_config(page_title="Microtome", layout="wide") 
 add_noindex()
 st.title("🔪 ミクロトーム 予約")
 
