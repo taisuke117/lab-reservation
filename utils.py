@@ -268,3 +268,10 @@ def show_calendar_page(title, equipment_colors, page_key):
                                         st.rerun()
 
             show_reservation_dialog(row)
+def add_noindex():
+    """Googleなどの検索エンジンにインデックスさせないためのメタタグを挿入"""
+    import streamlit as st
+    st.markdown(
+        '<meta name="robots" content="noindex, nofollow">',
+        unsafe_allow_html=True,
+    )
