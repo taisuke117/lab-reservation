@@ -19,7 +19,7 @@ div[data-testid="stCustomComponentV1"] > iframe {
 """, unsafe_allow_html=True)
 
 
-st.set_page_config(page_title="Whole calendar", layout="wide")
+st.set_page_config(page_title="Whole Calendar", layout="wide")
 st.title("📅 全体カレンダー（すべての機器）")
 st.caption("全カテゴリの利用状況をまとめて確認できます。予約・削除は各カテゴリページから行ってください。")
 
