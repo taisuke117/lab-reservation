@@ -4,7 +4,7 @@ sys.path.append("/mount/src/lab-reservation")
 from utils import show_calendar_page
 from utils import add_noindex
 
-st.set_page_config(page_title="Cell culture", layout="wide")
+st.set_page_config(page_title="Cell Culture", layout="wide")
 add_noindex()
 st.title("🧫 培養室 予約")
 
