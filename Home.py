@@ -8,7 +8,7 @@ add_noindex()
 
 st.title("🔬 NDUP機器 予約システム")
 st.markdown("---")
-st.subheader("予約したい機器のカテゴリを選んでください")
+st.subheader("カテゴリを選んでください")
 
 col1, col2 = st.columns(2)
 
