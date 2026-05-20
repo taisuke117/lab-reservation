@@ -6,7 +6,7 @@ from utils import add_noindex
 st.set_page_config(page_title="Lab Reservation", layout="wide")
 add_noindex()
 
-st.title("🔬 NDUP機器 予約システム")
+st.title("🔬 機器 予約システム")
 st.markdown("---")
 st.subheader("カテゴリを選んでください")
 
