@@ -1,10 +1,10 @@
 import streamlit as st
 import streamlit as st
-from utils import add_noindex   # ← 追加
+from utils import add_noindex
 
 
 st.set_page_config(page_title="NDUP機器 予約システム", layout="wide")
-add_noindex()   # ← set_page_config の直後に追加
+add_noindex()
 
 st.title("🔬 NDUP機器 予約システム")
 st.markdown("---")
