@@ -25,8 +25,6 @@ def check_password():
 if not check_password():
     st.stop()
 
-# ↓ 以下、既存のコード
-st.set_page_config(...)
 
 st.set_page_config(page_title="Lab Reservation", layout="wide")
 add_noindex()
