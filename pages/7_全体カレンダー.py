@@ -3,9 +3,11 @@ from utils import load_data
 from streamlit_calendar import calendar
 import streamlit as st
 from utils import add_noindex
+from utils import check_password
 
 st.set_page_config(layout="wide")
 add_noindex()
+check_password()
 
 # ↓↓↓ これを追加 ↓↓↓
 st.markdown("""
