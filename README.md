@@ -83,7 +83,7 @@ lab-reservation/
 ---
 
 ## 🔒 セキュリティ
-機密情報（APIキー等）はすべてStreamlit CloudのSecretsに暗号化保存しており、GitHubには一切アップロードしていません。
+機密情報（APIキー、パスワード等）はすべてStreamlit CloudのSecretsに暗号化保存しており、GitHubには一切アップロードしていません。
 
 ### Secretsの構成（管理者用）
 ```toml
