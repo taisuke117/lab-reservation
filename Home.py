@@ -1,4 +1,4 @@
-from utils import add_noindex
+from utils import add_noindex, check_password
 import streamlit as st
 
 # パスワード認証
@@ -28,6 +28,7 @@ if not check_password():
 
 st.set_page_config(page_title="Lab Reservation", layout="wide")
 add_noindex()
+check_password()
 
 st.title("🔬 NDUP機器 予約システム")
 st.markdown("---")
