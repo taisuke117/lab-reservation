@@ -14,4 +14,3 @@ jobs:
           APP_URL: ${{ secrets.APP_URL }}
         run: |
           curl -sS -o /dev/null -w "HTTP %{http_code}\n" --max-redirs 5 "${APP_URL%/}/_stcore/health"
-変更点は2つです。
