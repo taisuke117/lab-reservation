@@ -1,34 +1,25 @@
 # lab-reservation
-# 🔬 NDUP機器 予約システム v2.260525
+# 🔬 NDUP機器 予約システム v2.260603
 病理学講座の機器予約管理システムです。カレンダーをクリックするだけで予約・修正・削除ができます。
-
 ---
-
 ## 🌐 アクセスURL
 管理者に問い合わせてください。
-
 ---
-
 ## 📖 使い方
-
 ### 予約する
 1. トップページからカテゴリを選ぶ
 2. カレンダーの空き時間をクリック（またはドラッグ）
 3. 利用者・機器・日時を確認して「✅ 予約する」を押す
 4. 備考欄は任意入力です。記入した内容はカレンダー上にも表示されます
-
 ### 修正する
 1. カレンダー上の予約をクリック
 2. 詳細ダイアログで「修正」を選ぶ
 3. 内容を変更して「💾 修正を保存」を押す
-
 ### 削除する
 1. カレンダー上の予約をクリック
 2. 詳細ダイアログで「本当に削除してよいですか？」にチェック
 3. 「🗑️ 削除する」を押す
-
 ---
-
 ## 🗂 カテゴリ一覧
 | カテゴリ | 機器 |
 |---|---|
@@ -38,9 +29,7 @@
 | 🎥 バーチャル撮影装置 | バーチャル撮影装置 |
 | 🧬 分生関係 | 分生エリア／分生室 |
 | 🧫 培養室 | 安全キャビネット／クリーンベンチ |
-
 ---
-
 ## 🏗 システム構成
 ```
 利用者のブラウザ
@@ -48,8 +37,9 @@
 Streamlit Cloud（アプリサーバー）
 　　↕ データ読み書き
 Supabase（クラウドDB）
-```
 
+GitHub Actions（定期ping）→ Streamlit Cloud をスリープさせない
+```
 ### 使用技術
 | 技術 | 役割 |
 |---|---|
@@ -58,12 +48,10 @@ Supabase（クラウドDB）
 | Supabase (PostgreSQL) | 予約データの永続保存 |
 | Streamlit Cloud | 24時間稼働サーバー |
 | GitHub | コード管理 |
-
+| GitHub Actions | アプリの自動稼働維持（スリープ防止） |
 ---
-
 Streamlit   https://share.streamlit.io/  
 Supabase   https://supabase.com/
-
 ## 📁 ファイル構成
 ```
 lab-reservation/
@@ -71,6 +59,9 @@ lab-reservation/
 ├── utils.py                         ← 共通処理（DB・カレンダー・ダイアログ）
 ├── requirements.txt                 ← 依存ライブラリ
 ├── README.md                        ← このファイル
+├── .github/
+│   └── workflows/
+│       └── keep-awake.yml           ← アプリのスリープ防止（定期ping）
 └── pages/
     ├── 1_ミクロトーム.py
     ├── 2_実験台（実験室）.py
@@ -79,26 +70,38 @@ lab-reservation/
     ├── 5_分生関係.py
     └── 6_培養室.py
 ```
-
 ---
-
 ## 🔒 セキュリティ
 機密情報（APIキー、パスワード等）はすべてStreamlit CloudのSecretsに暗号化保存しており、GitHubには一切アップロードしていません。
-
 ### Secretsの構成（管理者用）
 ```toml
 USERS = '["氏名1", "氏名2", ...]'
 SUPABASE_URL = "https://xxx.supabase.co"
 SUPABASE_KEY = "sb_secret_xxx"
 ```
-
 ---
+## ♻️ 自動稼働維持（スリープ防止）
+Streamlit Community Cloud のアプリは、アクセスがない状態が続くと自動的にスリープし、次回アクセス時に起動待ち（数十秒〜数分）が発生します。
+これを防ぐため、`.github/workflows/keep-awake.yml` で GitHub Actions が定期的にアプリへ ping を送り、起きた状態を維持しています。
 
+- 実行間隔: 6時間おき（`cron` で設定。GitHub側の都合で多少前後します）
+- 送信先: アプリのヘルスチェック用エンドポイント `/_stcore/health`
+- アプリURLは GitHub Secrets の `APP_URL` に登録（リポジトリ上には記載しない）
+
+### GitHub Secrets の構成（管理者用）
+`Settings` →「Secrets and variables」→「Actions」で登録します。
+
+| Name | 値 |
+|---|---|
+| `APP_URL` | `https://xxx.streamlit.app/` |
+
+### 手動実行・動作確認
+`Actions` タブ →「Keep Streamlit app awake」→「Run workflow」で手動実行できます。
+ログに `HTTP 200`（またはリダイレクトを示す `3xx`）が出れば、サーバーへの通信は成功しています。
+---
 ## 🛠 メンバー追加・変更方法
 Streamlit Cloudの「Settings」→「Secrets」で`USERS`の配列を編集し、「Save」→「Reboot app」で反映されます。
 実施は管理者が行います。
-
 ---
-
 ## 📞 管理者
 Taisuke Hani
