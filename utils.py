@@ -274,6 +274,11 @@ def add_noindex():
         '<meta name="robots" content="noindex, nofollow">',
         unsafe_allow_html=True,
     )
+def show_footer():
+    """作成者とバージョンのフッター。バージョンは app_version.py が唯一の定義場所。"""
+    import streamlit as st
+    from app_version import APP_VERSION, AUTHOR, REPO_URL
+    st.caption(f"📌 作成者・管理者　{AUTHOR} 　{REPO_URL}　{APP_VERSION}")
 def check_password():
     import streamlit as st
 
@@ -286,13 +291,6 @@ def check_password():
 
     if st.session_state.get("password_correct"):
         return
-
-    # ブラウザのパスワードマネージャは「ユーザー名欄＋パスワード欄」の組を
-    # 手がかりに保存・自動入力を判断する。本アプリは共通パスワード運用なので
-    # ユーザー名は認証に使わないが、自動入力を安定させるために欄だけ置く。
-    st.text_input("ユーザー名（任意）", key="username",
-                  autocomplete="username",
-                  help="認証には使いません。ブラウザのパスワード自動入力を効かせるための欄です。")
 
     # ブラウザに「保存済みパスワードを入れてよい欄」だと認識させる。
     # autocomplete を指定しないと Streamlit は password 入力に自動で

@@ -1,5 +1,5 @@
 import streamlit as st
-from utils import add_noindex, check_password
+from utils import add_noindex, check_password, show_footer
 
 # set_page_config は最初の Streamlit コマンドである必要があるので
 # パスワード入力より先に呼ぶ
@@ -54,4 +54,4 @@ if st.button("📅 全体カレンダーを見る", use_container_width=True):
 
 st.markdown("---")
 st.caption("📌 各カテゴリページでカレンダーの空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・削除")
-st.caption("📌 作成者・管理者　Taisuke Hani 　https://github.com/taisuke117/lab-reservation　v2.260603")
+show_footer()

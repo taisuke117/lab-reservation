@@ -1,0 +1,5 @@
+__pycache__/
+*.py[cod]
+
+# Secrets はリポジトリに入れない（Streamlit Cloud の Secrets で管理）
+.streamlit/secrets.toml
