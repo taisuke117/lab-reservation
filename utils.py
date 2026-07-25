@@ -276,7 +276,7 @@ def add_noindex():
     )
 def check_password():
     import streamlit as st
-    
+
     def password_entered():
         if st.session_state["password"] == st.secrets["app_password"]:
             st.session_state["password_correct"] = True
@@ -284,12 +284,24 @@ def check_password():
         else:
             st.session_state["password_correct"] = False
 
-    if "password_correct" not in st.session_state:
-        st.text_input("パスワードを入力", type="password",
-                      on_change=password_entered, key="password")
-        st.stop()
-    elif not st.session_state["password_correct"]:
-        st.text_input("パスワードを入力", type="password",
-                      on_change=password_entered, key="password")
+    if st.session_state.get("password_correct"):
+        return
+
+    # ブラウザのパスワードマネージャは「ユーザー名欄＋パスワード欄」の組を
+    # 手がかりに保存・自動入力を判断する。本アプリは共通パスワード運用なので
+    # ユーザー名は認証に使わないが、自動入力を安定させるために欄だけ置く。
+    st.text_input("ユーザー名（任意）", key="username",
+                  autocomplete="username",
+                  help="認証には使いません。ブラウザのパスワード自動入力を効かせるための欄です。")
+
+    # ブラウザに「保存済みパスワードを入れてよい欄」だと認識させる。
+    # autocomplete を指定しないと Streamlit は password 入力に自動で
+    # "new-password" を付けるため、Chrome は自動入力を抑止してしまう。
+    st.text_input("パスワードを入力", type="password",
+                  autocomplete="current-password",
+                  on_change=password_entered, key="password")
+
+    if st.session_state.get("password_correct") is False:
         st.error("😕 パスワードが違います")
-        st.stop()
+
+    st.stop()

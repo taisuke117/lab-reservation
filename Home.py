@@ -1,34 +1,11 @@
-from utils import add_noindex, check_password
 import streamlit as st
+from utils import add_noindex, check_password
 
-# パスワード認証
-def check_password():
-    def password_entered():
-        if st.session_state["password"] == st.secrets["app_password"]:
-            st.session_state["password_correct"] = True
-            del st.session_state["password"]
-        else:
-            st.session_state["password_correct"] = False
-
-    if "password_correct" not in st.session_state:
-        st.text_input("パスワードを入力", type="password",
-                      on_change=password_entered, key="password")
-        return False
-    elif not st.session_state["password_correct"]:
-        st.text_input("パスワードを入力", type="password",
-                      on_change=password_entered, key="password")
-        st.error("😕 パスワードが違います")
-        return False
-    else:
-        return True
-
-if not check_password():
-    st.stop()
-
-
+# set_page_config は最初の Streamlit コマンドである必要があるので
+# パスワード入力より先に呼ぶ
 st.set_page_config(page_title="Lab Reservation", layout="wide")
 add_noindex()
-check_password()
+check_password()  # 未認証なら内部で st.stop()
 
 st.title("🔬 NDUP機器 予約システム")
 st.markdown("---")
