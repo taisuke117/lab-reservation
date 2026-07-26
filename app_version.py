@@ -8,6 +8,6 @@
 """
 
 APP_NAME = "NDUP機器 予約システム"
-APP_VERSION = "v2.260725"
+APP_VERSION = "v2.260726"
 AUTHOR = "Taisuke Hani"
 REPO_URL = "https://github.com/taisuke117/lab-reservation"

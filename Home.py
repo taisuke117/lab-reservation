@@ -1,9 +1,12 @@
 import streamlit as st
 from utils import add_noindex, check_password, show_footer
 
-# set_page_config は最初の Streamlit コマンドである必要があるので
-# パスワード入力より先に呼ぶ
-st.set_page_config(page_title="Lab Reservation", layout="wide")
+# set_page_config は最初の Streamlit コマンドである必要があるのでここで呼ぶ。
+# ログイン画面は従来どおり中央寄せ（centered）、ログイン後だけ wide にする。
+# session_state の読み取りは描画を伴わないので set_page_config より前でも良い。
+_authed = st.session_state.get("password_correct", False)
+st.set_page_config(page_title="Lab Reservation",
+                   layout="wide" if _authed else "centered")
 add_noindex()
 check_password()  # 未認証なら内部で st.stop()
 
