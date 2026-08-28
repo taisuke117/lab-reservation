@@ -12,6 +12,8 @@ st.title("🎥 バーチャル撮影装置 予約")
 
 equipment_colors = {
     "バーチャル撮影装置": "#8B008B",
+    "その他の作業1（バーチャル撮影）": "#708090",
+    "その他の作業2（バーチャル撮影）": "#696969",
 }
 
 show_calendar_page("バーチャル撮影装置", equipment_colors, "virtual_calendar")

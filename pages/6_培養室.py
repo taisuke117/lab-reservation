@@ -14,6 +14,8 @@ st.title("🧫 培養室 予約")
 equipment_colors = {
     "安全キャビネット": "#2F4F4F",
     "クリーンベンチ": "#333333",
+    "その他の作業1（培養室）": "#708090",
+    "その他の作業2（培養室）": "#696969",
 }
 
 show_calendar_page("培養室", equipment_colors, "culture_calendar")

@@ -13,6 +13,8 @@ st.title("🧬 分生関係 予約")
 equipment_colors = {
     "分生エリア": "#C71585",
     "分生室": "#3E2723",
+    "その他の作業1（分生）": "#708090",
+    "その他の作業2（分生）": "#696969",
 }
 
 show_calendar_page("分生関係", equipment_colors, "bunsei_calendar")

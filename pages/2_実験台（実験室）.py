@@ -13,6 +13,8 @@ equipment_colors = {
     "実験台１": "#006400",
     "実験台２": "#008080",
     "実験台３": "#0056B3",
+    "その他の作業1（実験台）": "#708090",
+    "その他の作業2（実験台）": "#696969",
 }
 
 show_calendar_page("実験台（実験室）", equipment_colors, "staining_calendar")

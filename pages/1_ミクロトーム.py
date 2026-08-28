@@ -15,6 +15,8 @@ equipment_colors = {
     "回転式ミクロトーム（A）": "#8B0000",
     "回転式ミクロトーム（B）": "#A0522D",
     "滑走型ミクロトーム": "#556B2F",
+    "その他の作業1（ミクロトーム）": "#708090",
+    "その他の作業2（ミクロトーム）": "#696969",
 }
 
 show_calendar_page("ミクロトーム", equipment_colors, "microtome_calendar")

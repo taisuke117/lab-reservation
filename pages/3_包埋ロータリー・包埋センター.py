@@ -13,6 +13,8 @@ st.title("📦 包埋ロータリー・包埋センター 予約")
 equipment_colors = {
     "包埋ロータリー": "#000080",
     "包埋センター": "#4B0082",
+    "その他の作業1（包埋）": "#708090",
+    "その他の作業2（包埋）": "#696969",
 }
 
 show_calendar_page("包埋ロータリー・包埋センター", equipment_colors, "embedding_calendar")
