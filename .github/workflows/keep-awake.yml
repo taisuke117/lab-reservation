@@ -1,4 +1,4 @@
-name: Keep Streamlit app awake
+name: Keep Streamlit app and Supabase awake
 
 on:
   schedule:
@@ -14,3 +14,15 @@ jobs:
           APP_URL: ${{ secrets.APP_URL }}
         run: |
           curl -sS -o /dev/null -w "HTTP %{http_code}\n" --max-redirs 5 "${APP_URL%/}/_stcore/health"
+
+      # /_stcore/health はアプリ本体を実行しないため Supabase には通信が発生しない。
+      # 無料プランは DB 無通信が続くとプロジェクトが自動 pause されるので、別途叩く。
+      - name: Ping Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          curl -sS -o /dev/null -w "Supabase HTTP %{http_code}\n" --fail \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}" \
+            "${SUPABASE_URL%/}/rest/v1/reservations?select=id&limit=1"

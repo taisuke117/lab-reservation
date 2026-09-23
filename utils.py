@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import json
+import functools
+import httpx
 from datetime import datetime, timedelta, date
 from streamlit_calendar import calendar
 from supabase import create_client
@@ -9,12 +11,34 @@ from supabase import create_client
 USERS = json.loads(st.secrets["USERS"])
 supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
 
+def _db_guard(func):
+    """Supabase に接続できないとき、生のトレースバックではなく案内を表示する。
+
+    httpx.TransportError は「サーバーと通信できなかった」系の基底クラス。
+    無料プランのプロジェクトが自動 pause されるとここに落ちる。
+    クエリ内容の誤りなど他のエラーはそのまま送出して握り潰さない。
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except httpx.TransportError:
+            st.error(
+                "🔌 データベース（Supabase）に接続できませんでした。\n\n"
+                "Supabase のプロジェクトが一時停止している可能性があります。"
+                "管理者は Supabase ダッシュボードで **Restore project** を実行してください。"
+            )
+            st.stop()
+    return wrapper
+
+@_db_guard
 def load_data():
     response = supabase.table("reservations").select("*").order("start_datetime").execute()
     if response.data:
         return pd.DataFrame(response.data)
     return pd.DataFrame(columns=["id", "nickname", "equipment", "start_datetime", "end_datetime", "notes"])
 
+@_db_guard
 def insert_reservation(nickname, equipment, start_dt, end_dt, notes=""):
     supabase.table("reservations").insert({
         "nickname": nickname,
@@ -24,6 +48,7 @@ def insert_reservation(nickname, equipment, start_dt, end_dt, notes=""):
         "notes": notes if notes and notes.strip() else " "
     }).execute()
 
+@_db_guard
 def update_reservation(reservation_id, nickname, equipment, start_dt, end_dt, notes=""):
     supabase.table("reservations").update({
         "nickname": nickname,
@@ -33,9 +58,11 @@ def update_reservation(reservation_id, nickname, equipment, start_dt, end_dt, no
         "notes": notes if notes and notes.strip() else " "
     }).eq("id", reservation_id).execute()
 
+@_db_guard
 def delete_reservation(reservation_id):
     supabase.table("reservations").delete().eq("id", reservation_id).execute()
 
+@_db_guard
 def check_conflict(equipment, start_dt, end_dt, exclude_id=None):
     response = supabase.table("reservations").select("*").eq("equipment", equipment).execute()
     for r in response.data:
