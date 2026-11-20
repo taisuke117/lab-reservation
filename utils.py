@@ -79,9 +79,16 @@ def _combine_with_hour(d, hour):
 
 # FullCalendar は週・日表示で予約ブロックの右に列幅 2.5% しか余白を残さない。
 # 同じ時間帯に別の予約を入れるときはこの余白をクリックするので、広げておく。
+# 横並びで細くなった予約は、マウスを乗せている間だけ手前に出して列幅いっぱいに広げる
+# （横位置はインライン style で指定されているため !important が要る）。
 CALENDAR_CSS = """
 .fc-direction-ltr .fc-timegrid-col-events {
     margin: 0 20% 0 2px !important;
+}
+.fc-timegrid-event-harness:hover {
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 10 !important;
 }
 """
 
