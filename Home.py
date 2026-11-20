@@ -37,7 +37,7 @@ with col1:
 
     if st.button("🎨 染色系列", use_container_width=True, type="primary"):
         st.switch_page("pages/7_染色系列.py")
-    st.caption("染色系列1／染色系列2／染色系列3（同じ時間帯に複数人で予約できます）")
+    st.caption("染色系列（同じ時間帯に複数人で予約できます）")
 
 with col2:
     if st.button("🪑 実験台（実験室）", use_container_width=True, type="primary"):

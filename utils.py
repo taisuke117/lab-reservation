@@ -92,6 +92,33 @@ CALENDAR_CSS = """
 }
 """
 
+def _event_colors(df, equipment_colors):
+    """予約ごとの色を決める。
+
+    equipment_colors の値は色1つか、色のリスト（パレット）。パレットの機器は、
+    時間が重なる予約どうしで違う色になるよう、開始の早い順に「重なっている予約が
+    使っていない最初の色」を割り当てる。重ならない予約はパレットの先頭の色になる。
+    ページを開き直しても同じ結果になるよう、乱数は使わない。
+    """
+    colors = {}
+    for equipment, color in equipment_colors.items():
+        rows = df[df["equipment"] == equipment]
+        if not isinstance(color, list):
+            colors.update({i: color for i in rows.index})
+            continue
+        starts = pd.to_datetime(rows["start_datetime"])
+        ends = pd.to_datetime(rows["end_datetime"])
+        order = sorted(rows.index, key=lambda i: (starts[i], -(ends[i] - starts[i]), rows.at[i, "id"]))
+        active = []  # (終了時刻, 色番号)
+        for n, i in enumerate(order):
+            active = [(e, k) for e, k in active if e > starts[i]]
+            used = {k for _, k in active}
+            free = [k for k in range(len(color)) if k not in used]
+            k = free[0] if free else n % len(color)
+            active.append((ends[i], k))
+            colors[i] = color[k]
+    return colors
+
 def show_calendar_page(title, equipment_colors, page_key, allow_overlap=False):
     equipment_list = list(equipment_colors.keys())
     st.caption("📌 空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・修正・削除")
@@ -103,7 +130,8 @@ def show_calendar_page(title, equipment_colors, page_key, allow_overlap=False):
 
     events = []
     if not df.empty:
-        for _, row in df.iterrows():
+        row_colors = _event_colors(df, equipment_colors)
+        for idx, row in df.iterrows():
             notes_val = str(row.get('notes', '')).strip()
             # 備考があればタイトルに追記
             if notes_val and notes_val != "nan":
@@ -115,8 +143,8 @@ def show_calendar_page(title, equipment_colors, page_key, allow_overlap=False):
                 "title": title_str,
                 "start": row['start_datetime'],
                 "end": row['end_datetime'],
-                "backgroundColor": equipment_colors.get(row['equipment'], "#808080"),
-                "borderColor": equipment_colors.get(row['equipment'], "#808080")
+                "backgroundColor": row_colors.get(idx, "#808080"),
+                "borderColor": row_colors.get(idx, "#808080")
             })
 
     calendar_options = {
