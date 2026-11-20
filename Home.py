@@ -33,8 +33,14 @@ with col1:
         st.switch_page("pages/5_分生関係.py")
     st.caption("分生エリア／分生室")
 
+    st.markdown("")
+
+    if st.button("🎨 染色系列", use_container_width=True, type="primary"):
+        st.switch_page("pages/7_染色系列.py")
+    st.caption("染色（同じ時間帯に複数人で予約できます）")
+
 with col2:
-    if st.button("🎨 実験台（実験室）", use_container_width=True, type="primary"):
+    if st.button("🪑 実験台（実験室）", use_container_width=True, type="primary"):
         st.switch_page("pages/2_実験台（実験室）.py")
     st.caption("実験台１／実験台２／実験台３ (廊下側から窓側に向かって1, 2, 3)")
 
@@ -53,7 +59,7 @@ with col2:
 st.markdown("---")
 # 全体カレンダーへのボタン（一番下）
 if st.button("📅 全体カレンダーを見る", use_container_width=True):
-    st.switch_page("pages/7_全体カレンダー.py")
+    st.switch_page("pages/8_全体カレンダー.py")
 
 st.markdown("---")
 st.caption("📌 各カテゴリページでカレンダーの空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・削除")

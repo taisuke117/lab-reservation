@@ -77,7 +77,15 @@ def _combine_with_hour(d, hour):
         return datetime.combine(d + timedelta(days=1), datetime.min.time())
     return datetime.combine(d, datetime.min.time().replace(hour=hour))
 
-def show_calendar_page(title, equipment_colors, page_key):
+# FullCalendar は週・日表示で予約ブロックの右に列幅 2.5% しか余白を残さない。
+# 同じ時間帯に別の予約を入れるときはこの余白をクリックするので、広げておく。
+CALENDAR_CSS = """
+.fc-direction-ltr .fc-timegrid-col-events {
+    margin: 0 20% 0 2px !important;
+}
+"""
+
+def show_calendar_page(title, equipment_colors, page_key, allow_overlap=False):
     equipment_list = list(equipment_colors.keys())
     st.caption("📌 空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・修正・削除")
     if st.button("🏠 トップに戻る"):
@@ -128,7 +136,8 @@ def show_calendar_page(title, equipment_colors, page_key):
     "dayMaxEvents": True,         # ← 追加：多すぎるイベントは"+N more"に折りたたむ
 }
 
-    cal_result = calendar(events=events, options=calendar_options, key=page_key)
+    cal_result = calendar(events=events, options=calendar_options,
+                          custom_css=CALENDAR_CSS, key=page_key)
 
     slot_min_h = int(calendar_options["slotMinTime"][:2])
     slot_max_h = int(calendar_options["slotMaxTime"][:2])
@@ -205,7 +214,7 @@ def show_calendar_page(title, equipment_colors, page_key):
                         if start_dt >= end_dt:
                             st.error("終了日時は開始日時より後に設定してください。")
                         else:
-                            if check_conflict(equipment, start_dt, end_dt):
+                            if not allow_overlap and check_conflict(equipment, start_dt, end_dt):
                                 st.error("⚠️ その時間は既に別の予約が入っています。")
                             else:
                                 insert_reservation(nickname, equipment, start_dt, end_dt, notes)
@@ -287,7 +296,7 @@ def show_calendar_page(title, equipment_colors, page_key):
                                 if start_dt >= end_dt:
                                     st.error("終了日時は開始日時より後に設定してください。")
                                 else:
-                                    if check_conflict(equipment, start_dt, end_dt, exclude_id=int(row["id"])):
+                                    if not allow_overlap and check_conflict(equipment, start_dt, end_dt, exclude_id=int(row["id"])):
                                         st.error("⚠️ その時間は既に別の予約が入っています。")
                                     else:
                                         update_reservation(int(row["id"]), nickname, equipment, start_dt, end_dt, notes)

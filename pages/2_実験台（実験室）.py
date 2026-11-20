@@ -7,7 +7,7 @@ from utils import check_password
 st.set_page_config(page_title="Lab Bench", layout="wide")
 add_noindex()
 check_password()
-st.title("🎨 実験台（実験室） 予約")
+st.title("🪑 実験台（実験室） 予約")
 
 equipment_colors = {
     "実験台１": "#006400",
