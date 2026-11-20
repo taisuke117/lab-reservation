@@ -123,6 +123,7 @@ def show_calendar_page(title, equipment_colors, page_key, allow_overlap=False):
     "editable": False,
     "selectable": True,
     "selectMinDistance": 0,
+    "slotEventOverlap": False,    # 同じ時間帯の予約を重ねず横に並べる
     "timeZone": "Asia/Tokyo",
     "slotLabelFormat": {"hour": "2-digit", "minute": "2-digit", "hour12": False},
     "eventTimeFormat": {"hour": "2-digit", "minute": "2-digit", "hour12": False},
