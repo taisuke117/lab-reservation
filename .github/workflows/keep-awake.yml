@@ -2,22 +2,40 @@ name: Keep Streamlit app and Supabase awake
 
 on:
   schedule:
-    - cron: '0 0,6,12,18 * * *'
+    # アプリは12時間アクセスがないとスリープする。GitHub の定期実行は混雑で遅れたり
+    # 飛ばされたりする（実績で最大14.6時間空いた）ので3時間おきにし、
+    # 特に混みやすい毎時0分は避ける。
+    - cron: '17 */3 * * *'
   workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: Ping the app
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      # curl で GET するだけではスリープ扱いが解除されない（スリープ中でも HTTP 200 が返る）。
+      # ブラウザで実際に開き、スリープ画面なら起動ボタンを押してログイン画面が出るまで待つ。
+      - name: Open the app in a headless browser
         env:
           APP_URL: ${{ secrets.APP_URL }}
-        run: |
-          curl -sS -o /dev/null -w "HTTP %{http_code}\n" --max-redirs 5 "${APP_URL%/}/_stcore/health"
+        run: python tools/wake_app.py
 
-      # /_stcore/health はアプリ本体を実行しないため Supabase には通信が発生しない。
+      # アプリ本体を開いてもログイン前は DB に触れないため Supabase には通信が発生しない。
       # 無料プランは DB 無通信が続くとプロジェクトが自動 pause されるので、別途叩く。
+      # 上の手順が失敗してもこちらは必ず実行する。
       - name: Ping Supabase
+        if: always()
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}

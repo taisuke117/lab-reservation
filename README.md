@@ -45,7 +45,7 @@ Streamlit Cloud（アプリサーバー）
 　　↕ データ読み書き
 Supabase（クラウドDB）
 
-GitHub Actions（定期ping）→ Streamlit Cloud をスリープさせない
+GitHub Actions（ヘッドレスブラウザで定期アクセス）→ Streamlit Cloud をスリープさせない
 ```
 ### 使用技術
 | 技術 | 役割 |
@@ -68,10 +68,11 @@ lab-reservation/
 ├── requirements.txt                 ← 依存ライブラリ
 ├── README.md                        ← このファイル
 ├── tools/
-│   └── update_version.py            ← バージョンを README へ同期するスクリプト
+│   ├── update_version.py            ← バージョンを README へ同期するスクリプト
+│   └── wake_app.py                  ← アプリをブラウザで開いて起こす（GitHub Actions から実行）
 ├── .github/
 │   └── workflows/
-│       └── keep-awake.yml           ← アプリのスリープ防止（定期ping）
+│       └── keep-awake.yml           ← アプリと Supabase のスリープ防止（定期実行）
 └── pages/
     ├── 1_ミクロトーム.py
     ├── 2_実験台（実験室）.py
@@ -117,11 +118,13 @@ README 側は、このファイル冒頭の見出し行にあるバージョン�
 
 ---
 ## ♻️ 自動稼働維持（スリープ防止）
-Streamlit Community Cloud のアプリは、アクセスがない状態が続くと自動的にスリープし、次回アクセス時に起動待ち（数十秒〜数分）が発生します。
-これを防ぐため、`.github/workflows/keep-awake.yml` で GitHub Actions が定期的にアプリへ ping を送り、起きた状態を維持しています。
+Streamlit Community Cloud のアプリは、12時間アクセスがないと自動的にスリープし、次回アクセス時に起動待ち（数十秒〜数分）が発生します。
+これを防ぐため、`.github/workflows/keep-awake.yml` で GitHub Actions が定期的にアプリを開き、起きた状態を維持しています。
 
-- 実行間隔: 6時間おき（`cron` で設定。GitHub側の都合で多少前後します）
-- 送信先: アプリのヘルスチェック用エンドポイント `/_stcore/health`
+- 実行間隔: 3時間おき（毎時17分。GitHub 側の混雑で遅れたり飛ばされたりするため、12時間より十分短くしています）
+- やり方: `tools/wake_app.py` がヘッドレスブラウザ（Playwright）でアプリを開き、ログイン画面が表示されるまで待ちます。スリープ画面が出ていたら起動ボタンを押します
+- `curl` で URL にアクセスするだけでは、アクセスとして数えられずスリープを防げません（スリープ中でも HTTP 200 が返るため、失敗にも気づけません）。以前はこの方式で、うまく働いていませんでした
+- 同じワークフローで Supabase にも問い合わせを送り、無料プランの自動 pause を防いでいます
 - アプリURLは GitHub Secrets の `APP_URL` に登録（リポジトリ上には記載しない）
 
 ### GitHub Secrets の構成（管理者用）
@@ -132,8 +135,9 @@ Streamlit Community Cloud のアプリは、アクセスがない状態が続く
 | `APP_URL` | `https://xxx.streamlit.app/` |
 
 ### 手動実行・動作確認
-`Actions` タブ →「Keep Streamlit app awake」→「Run workflow」で手動実行できます。
-ログに `HTTP 200`（またはリダイレクトを示す `3xx`）が出れば、サーバーへの通信は成功しています。
+`Actions` タブ →「Keep Streamlit app and Supabase awake」→「Run workflow」で手動実行できます。
+「Open the app in a headless browser」のログに「アプリが起動していることを確認しました」と出れば成功です。スリープ中だった場合は「（スリープ中だったので起こしました）」が付きます。
+起動を確認できなかったときはワークフローが失敗（赤い×）になります。「Ping Supabase」のログに `Supabase HTTP 200` が出れば、Supabase への通信は成功しています。
 ---
 ## 🛠 メンバー追加・変更方法
 Streamlit Cloudの「Settings」→「Secrets」で`USERS`の配列を編集し、「Save」→「Reboot app」で反映されます。
