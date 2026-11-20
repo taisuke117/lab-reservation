@@ -1,5 +1,7 @@
 import streamlit as st
-from utils import add_noindex, check_password, show_footer
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from utils import add_noindex, check_password, show_footer, load_data, reservations_to_csv
 
 # set_page_config は最初の Streamlit コマンドである必要があるのでここで呼ぶ。
 # ログイン画面は従来どおり中央寄せ（centered）、ログイン後だけ wide にする。
@@ -60,6 +62,14 @@ st.markdown("---")
 # 全体カレンダーへのボタン（一番下）
 if st.button("📅 全体カレンダーを見る", use_container_width=True):
     st.switch_page("pages/8_全体カレンダー.py")
+
+st.markdown("---")
+st.subheader("データの出力")
+_today = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y%m%d")
+st.download_button("📥 これまでの予約状況をCSVで出力",
+                   data=reservations_to_csv(load_data()),
+                   file_name=f"reservations_{_today}.csv",
+                   mime="text/csv", use_container_width=True)
 
 st.markdown("---")
 st.caption("📌 各カテゴリページでカレンダーの空き時間をクリック → 新規予約　／　既存の予約をクリック → 詳細・削除")

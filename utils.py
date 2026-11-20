@@ -72,6 +72,19 @@ def check_conflict(equipment, start_dt, end_dt, exclude_id=None):
             return True
     return False
 
+def reservations_to_csv(df):
+    """全予約を CSV（Excel でそのまま開けるよう BOM 付き UTF-8）にする。"""
+    out = pd.DataFrame({
+        "ID": df["id"],
+        "利用者": df["nickname"],
+        "機器": df["equipment"],
+        "開始": pd.to_datetime(df["start_datetime"]).dt.strftime("%Y-%m-%d %H:%M"),
+        "終了": pd.to_datetime(df["end_datetime"]).dt.strftime("%Y-%m-%d %H:%M"),
+        # 備考なしの予約は DB に半角スペース1つで入っている
+        "備考": df["notes"].fillna("").astype(str).str.strip(),
+    })
+    return out.to_csv(index=False).encode("utf-8-sig")
+
 def _combine_with_hour(d, hour):
     if hour == 24:
         return datetime.combine(d + timedelta(days=1), datetime.min.time())
