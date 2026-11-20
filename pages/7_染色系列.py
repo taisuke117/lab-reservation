@@ -9,6 +9,7 @@ st.set_page_config(page_title="Staining", layout="wide")
 add_noindex()
 check_password()
 st.title("🎨 染色系列 予約")
+st.info("実験台を使う場合は、🪑 実験台（実験室）のページで実験台も予約してください。")
 
 # 染色系列は色のリストにして、時間が重なった予約ほど後ろの色で塗り分ける
 equipment_colors = {
